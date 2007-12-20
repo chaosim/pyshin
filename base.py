@@ -4,7 +4,7 @@ from pyshin.option import Option, OptionContainer
 
 class Element(object): 
     def __init__(self, __name__, __doc__=''):
-        """Create an 'attribute' description
+        """
         """
         if not __doc__ and __name__.find(' ') >= 0:
             __doc__ = __name__
@@ -39,7 +39,10 @@ class CommandBase(Element):
   action: an callable object.
   '''
   def __init__(self):
-    pass
+    self.options = {}
+    for attr, value in self.__class__.__dict__.items():       
+      if isinstance(value, Option):
+        self.options[attr] = value
     
   def execute(self, *arg, **kw):
     '''any command instance should overload this method'''
