@@ -1,0 +1,13 @@
+
+  >>> from pyshin.tests.commands import cmd1, h, v, w
+  
+  >>> cmd1
+  run with default
+  >>> cmd1 -h
+  usage: cmd1 options .file==name .path==path
+  options: 
+  -v, --verbose: display verbose information
+  -w: set tabwidth to 4
+  -h, --help: display this help infomation
+  >>> cmd1 /v /w
+  run with default more verbose with tab = 4
