@@ -1,4 +1,5 @@
 from error import OptionError
+from base import Attribute
 
 class OptionContainer:
   '''the container of the options provided in the CommandCall'''
@@ -84,7 +85,7 @@ def check_choice(option, opt, value):
             _("option %s: invalid choice: %r (choose from %s)")
             % (opt, value, choices))
 
-class Option:
+class Option(Attribute):
     """
     Instance attributes:
       _short_opts : [string]
@@ -193,9 +194,10 @@ class Option:
 
     # -- Constructor/initialization methods ----------------------------
 
-    def __init__(self, *opts, **attrs):
+    def __init__(self, name, *opts, **attrs):
         # Set _short_opts, _long_opts attrs from 'opts' tuple.
         # Have to be set now, in case no option strings are supplied.
+        Attribute.__init__(self, name)
         self._short_opts = []
         self._long_opts = []
         opts = self._check_opt_strings(opts)

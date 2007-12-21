@@ -1,0 +1,17 @@
+
+2007-12-20 21:01
+   CommandClass:
+    "class SomeCommand(Command)" produces an instance of CommandClass
+    CommandClass.__call__ produces CommandCall
+    options should be in options of  the command
+    "Method" in the command is just a function and becomes true method of the 
+      instance of CommandCall
+  CommandCall:
+    Pipeline operators | > < produce CommandCallChain
+    The output of the previous call becomes the input of next call
+    "cmd -o" adds the option o to cmd.options
+    Meeting with options repeated raises RepeatOptionError
+    The option followed after commandcall must be an option of the Command, otherwise raises InvalidOption
+  
+2007-12-16 20:59
+  Basic concepts of CommandClass-Command, CommandCall, Option shaped up 

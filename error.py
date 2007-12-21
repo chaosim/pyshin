@@ -1,5 +1,10 @@
-
 class PyshinError(Exception):
+  pass
+
+class InvalidCommand(PyshinError):
+  pass
+  
+class InvalidOption(PyshinError):
   pass
   
 class PyshinSyntaxError(PyshinError):
@@ -7,6 +12,8 @@ class PyshinSyntaxError(PyshinError):
   pyshin√¸¡Ó”Ô∑®¥ÌŒÛ
   '''
   pass
+
+class RepeatOptionError(PyshinSyntaxError):pass
 
 class OutofRange(PyshinError):
   '''value provided is out of range

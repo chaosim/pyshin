@@ -10,21 +10,68 @@ options and arguments provided'''
 ##nameerror()  
 ##stop
 
+##from command import Command
+##stop
 from pyshin.option import Option, OptionContainer
-from base import CommandBase
+from pyshin.error import RepeatOptionError, InvalidOption
 
-class Command(CommandBase):
-  '''an occurence of a command
+
+class CommandCallBase(object):
+  ''' trig the execution by repr(and str? )
+  '''  
+  def __init__(self):
+    pass
+
+# ------------------------------------------------------------------------------
+# trig the execute of the call of the command
+  def xxx_execute(self, *arg, **kw):    
+    '''the call of the command shouldn't know how to execute itself, this task should
+    be dispatch to the command'''
+     
+    #print 'execute', self.options
+    
+    result = 'run with'
+    if v in self.options:
+      result = 'run with more verbose and tab = 4'
+      if w in self.options:
+        result += ' and tab = 4'
+    elif w in self.options:
+      result += ' with tab = 4'
+    else:
+      result += 'default'
+    if h in self.options:
+      result = '''  usage: cmd1 options .file==name .path==path
+  options: 
+  -v, --verbose: display verbose information
+  -w: set tabwidth to 4
+  /h, /help, -h, --help: display this help infomation'''
+    return result
+  
+  def __repr__(self):
+    '''all given option and arguments have been given just now,
+    should execute the actual action of the command with them, 
+    maybe print or don't print the result.'''
+    return self.execute()
+
+  def __str__(self):
+    '''the CommandCall should be executed according to its command with given option and arguments and print the result.'''  
+  __str__ = __repr__
+
+class CommandCall(CommandCallBase):
+  '''single call of a command
+  an occurence of a command
   To implement pipeline, should have result in its instance.
   This class should contain the command it bases on.
   >>> cmd
   >>> cmd -o
   >>> cmd --help
   >>> cd.pyshin.test
-  >>> edit.readme.txt
-  '''  
-  def __init__(self):
-    super(Command,self).__init__()
+  >>> edit.readme.txt'''
+  def __init__(self,command):
+    super(CommandCall,self).__init__()
+    self.command = command
+    self.output = None
+    self.options = []
 
 # --------------------------------------------------------------------
 # provide option and arguments by operator:
@@ -40,7 +87,13 @@ class Command(CommandBase):
      >>> cmd --help
      >>> cmd --file=='readme.txt'
      '''
-    self.options.addOption(other)
+    #print 42314142, '__sub__ self.command.options', self.command.options
+    if other not in [option for name, option in self.command.options.items()]:
+      raise InvalidOption
+    if other in self.options:
+      raise RepeatOptionError
+    self.options.append(other)
+    
     return self
 
   # maybe it shouldn't put here, maybe in class Option.
@@ -81,12 +134,14 @@ class Command(CommandBase):
     
     elif attr in self.__dict__:
       return self.__dict__[attr]
-    else: raise AttributeError, attr
+    else: 
+      print 2134443, attr
+      raise AttributeError, attr
   
   def xxx__coerce__(self, other):
     '''prevent errors raising by __getattr__ and __or__'''
     return self,other
-  
+
 # ------------------------------------------------------------------------------
 # process Command Call Chain operator: > < |
   def __gt__(self, other):
@@ -116,45 +171,8 @@ class Command(CommandBase):
     XXX can't do this, for __and__ simulating & operator'''
     return CommandCallChain([self, other])
       
-# ------------------------------------------------------------------------------
-# trig the execute of the call of the command
-  def xxx_execute(self, *arg, **kw):    
-    '''the call of the command shouldn't know how to execute itself, this task should
-    be dispatch to the command'''
-     
-    #print 'execute', self.options
-    
-    result = 'run with'
-    if v in self.options:
-      result = 'run with more verbose and tab = 4'
-      if w in self.options:
-        result += ' and tab = 4'
-    elif w in self.options:
-      result += ' with tab = 4'
-    else:
-      result += 'default'
-    if h in self.options:
-      result = '''  usage: cmd1 options .file==name .path==path
-  options: 
-  -v, --verbose: display verbose information
-  -w: set tabwidth to 4
-  /h, /help, -h, --help: display this help infomation'''
-    return result
-  
-  def __repr__(self):
-    '''all given option and arguments have been given just now,
-    should execute the actual action of the command with them, 
-    maybe print or don't print the result.'''
-    return self.execute()
-
-  def __str__(self):
-    '''the CommandCall should be executed according to its command with given option and arguments and print the result.'''  
-  __str__ = __repr__
-
-class SingleCommand(Command):
-  '''single call of a command'''
-        
-class CommandChain(Command):
+          
+class CommandCallChain(CommandCallBase):
   '''Calls chain of commands.'''
   def __init__(self, calls=None):
     if calls is None:

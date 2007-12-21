@@ -5,50 +5,90 @@ from zope.testing import doctest
 
 import exceptions
 
-from pyshin.command import CommandCall
+from pyshin.call import CommandCall
 from pyshin.call import CommandCallChain
 from pyshin.option import Option
+from pyshin.error import RepeatOptionError, InvalidOption
 
-class CommandTestCase(unittest.TestCase):
+from pyshin.tests.commands import TestCommand
+
+class CommandCallTestCase(unittest.TestCase):
 
   def setUp(self):
-    self.cmda = CommandCall('a', None)
-    self.cmdb = CommandCall('b', None)                
+    pass
       
-  def xxxtest_Command(self):
+  def xxxtest_CommandCall(self):
     # xxx wait some other done correctly.
-    self.assertRaises(exceptions.TypeError, repr, self.cmda)
+    cmda = CommandCall('a')
+    cmdb = CommandCall('b')                
+    self.assertRaises(exceptions.TypeError, repr, cmda)
   
-  def test_operator(self):
-    '''pipeline operator'''
+  def test_pipeline_operator(self):
+    '''Pipeline operators | > < should produce CommandCallChain'''
     # a | b
-    result = self.cmda | self.cmdb
+    cmda = CommandCall('a')
+    cmdb = CommandCall('b')                
+    result = cmda | cmdb
     self.assert_(isinstance(result, CommandCallChain))
-    self.assert_((result[0] is self.cmda) and (result[1] is self.cmdb))
+    self.assert_((result[0] is cmda) and (result[1] is cmdb))
     # a > b 
-    result = self.cmda > self.cmdb
+    result =cmda > cmdb
     self.assert_(isinstance(result, CommandCallChain))
-    self.assert_((result[0] is self.cmda) and (result[1] is self.cmdb))
+    self.assert_((result[0] is cmda) and (result[1] is cmdb))
     # a < b 
-    result = self.cmda<self.cmdb
+    result = cmda < cmdb
     self.assert_(isinstance(result, CommandCallChain))
-    self.assert_((result[0] is self.cmda) and (result[1] is self.cmdb))
+    self.assert_((result[0] is cmda) and (result[1] is cmdb))
     
   def test_forward_pipeline(self):
-    '''the output of the previous call become the input of next call
+    '''The output of the previous call become the input of the next call
     前一个命令的输入成为后一个命令的输入'''
-    chain = self.cmda > self.cmdb
-    self.assert_(self.cmdb.input is self.cmda.output)
+    cmda = CommandCall('a')
+    cmdb = CommandCall('b')                
+    chain = cmda > cmdb
+    self.assert_(cmdb.input is cmda.output)
 
   def xxxtest__and__(self):
     result = self.cmda and self.cmdb
     self.assert_(isinstance(result, CommandCallChain))
   
   def test_option(self):
-    opt1 = Option('--opt1')
-    result = self.cmda -opt1
-    self.assert_(opt1 in self.cmda.options)
+    '''"cmd -o" should add the option o to cmd.options'''
+    cmd = CommandCall(TestCommand)
+    o = Option('o', '-o')
+    result = cmd -o
+    self.assert_(o in cmd.options)
   
+  def test_no_repeat_option(self):
+    '''Meeting with options repeated should raise RepeatOptionError'''
+    cmd = CommandCall(TestCommand)
+    o = Option('o', '-o')
+    try: 
+      result = cmd -o -o
+      self.fail('should raise syntax error')
+    except RepeatOptionError: pass
+  
+  def test_legal_option(self):
+    '''The option followed after commandcall must be an option of the Command'''
+    from pyshin.tests.commands import CommandWithoutOption
+    cmd = CommandCall(CommandWithoutOption)
+    o = Option('o', '-o')
+    try:
+      result = cmd -o
+      self.fail('should check invalid option')
+    except InvalidOption: pass
+    
+  def test_addOptionToCommand(self):
+    ''' Meeting with options should store value in the commandcall'''
+    a = Option('a', '-a')
+    cmd = CommandCall(TestCommand)
+    result = cmd -a
+    self.assertEqual(result.a, True)  
+    b = Option('b', '-b')
+    cmd = CommandCall(TestCommand)
+    result = cmd -b
+    self.assertEqual(result.bb, False)  
+    
   def test_attr_arg(self):
     '''dotted name argument
 
@@ -73,8 +113,8 @@ class CommandTestCase(unittest.TestCase):
     '''
     
 def test_suite():
-  suite = unittest.TestSuite((unittest.makeSuite(CommandTestCase),
-          DocTestSuite('pyshin.tests.test_command'),  
+  suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
+          #DocTestSuite('pyshin.tests.test_command'),  
          ))
   return suite
 
