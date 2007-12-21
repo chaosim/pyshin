@@ -452,10 +452,26 @@ class Option(Attribute):
 
 # class Option
 
-class OptionInstance:
-  '''instance of Option
-  Occurence of Option
-  选项实例'''
-  def __init__(self, option):
-    self.option = option
+class OptionOccur:
+  '''Occurence of Option in the CommandCall
+  出现在命令调用中的选项'''
+  def __init__(self, name):
+    self.name = name
+  def __call__(self, value):
+    self.value = value
+    return self
+  def __getattr__(self, attr):
+##    print 435565656
+    if attr=='value': 
+      return self.__dict__[attr]
+    try:
+      return self.__dict__[attr]
+    except:
+      try: 
+        self.__dict__['value'] +='.'+attr
+      except:
+        self.__dict__['value'] = attr
+      return self
+      
+ 
     

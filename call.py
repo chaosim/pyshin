@@ -88,14 +88,70 @@ class CommandCall(CommandCallBase):
      >>> cmd --file=='readme.txt'
      '''
     #print 42314142, '__sub__ self.command.options', self.command.options
-    if other not in [option for name, option in self.command.options.items()]:
+    #print 6876876876, other
+    if other.name not in self.command.options:
       raise InvalidOption
     if other in self.options:
       raise RepeatOptionError
     self.options.append(other)
-    
-    return self
+    #print 3443342, 'self.command.options[other.__name__]', self.command.options[other.__name__]
+    cmdoption = self.command.options[other.name]
+    #print 43412423, other.__name__, self.command.options, cmdoption.dest, cmdoption.action# dir(cmdoption)
+    action = cmdoption.action
+    if action=='store_true':
+      setattr(self, cmdoption.dest, True)
+    elif action=='store_false':
+      setattr(self, cmdoption.dest, False)
+    elif action == "store_const":
+      setattr(self, cmdoption.dest, cmdoption.const)
+    if action == "store":
+      #print 'debuggging 23144231'
+      try:
+        setattr(self, cmdoption.dest, other.value)
+      except:
+        self.whoWaitValue = cmdoption.dest
+##    elif action == "append":
+##      try: 
+##        getattr(self, cmdoption.dest).append(other.value)
+##      except:
+##        setattr(self, cmdoption.dest, [other.value])
+##    elif action == "count":
+##      try: 
+##        x = getattr(self, cmdoption.dest) 
+##        x +=  1
+##      except:
+##        setattr(self, cmdoption.dest, 1)
+##    elif action == "callback":
+##        args = self.callback_args or ()
+##        kwargs = self.callback_kwargs or {}
+##        self.callback(self, opt, value, parser, *args, **kwargs)
+##    elif action == "help":
+##        parser.print_help()
+##        parser.exit()
+##    elif action == "version":
+##        parser.print_version()
+##        parser.exit()
+##    else:
+##        raise RuntimeError, "unknown action %r" % self.action
 
+    return self
+  
+  def seebelow__eq__(self, other):
+    self.validateOptionValue(self.activeoption)
+    self.options[self.activeoption] = other
+
+  def __eq__(self, other):
+    '''a value should be assigned to previous option
+    validity of the value to the option should be checked.
+    >>> cmd --opt==asdf
+    '''
+    if self.whoWaitValue:
+      #self.whowaitValue = other
+      print 'self.whoWaitValue', self.whoWaitValue
+      setattr(self, self.whoWaitValue, other)
+      self.whoWaitValue = None
+      return self
+  
   # maybe it shouldn't put here, maybe in class Option.
   def xxx__neg__(self):
     '''for long option'''
@@ -106,13 +162,6 @@ class CommandCall(CommandCallBase):
     self.options.add(other)
     return self
   
-  def __eq__(self, other):
-    '''a value should be assigned to previous option
-    validity of the value to the option should be checked.
-    >>> cmd --opt==asdf
-    '''
-    self.validateOptionValue(self.activeoption)
-    self.options[self.activeoption] = other
   
   def __call__(self, *arg, **kw):
     '''one or more actual arguments should be added.'''

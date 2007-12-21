@@ -7,7 +7,7 @@ import exceptions
 
 from pyshin.call import CommandCall
 from pyshin.call import CommandCallChain
-from pyshin.option import Option
+from pyshin.option import Option, OptionOccur
 from pyshin.error import RepeatOptionError, InvalidOption
 
 from pyshin.tests.commands import TestCommand
@@ -55,14 +55,14 @@ class CommandCallTestCase(unittest.TestCase):
   def test_option(self):
     '''"cmd -o" should add the option o to cmd.options'''
     cmd = CommandCall(TestCommand)
-    o = Option('o', '-o')
+    o = OptionOccur('o')
     result = cmd -o
     self.assert_(o in cmd.options)
   
   def test_no_repeat_option(self):
     '''Meeting with options repeated should raise RepeatOptionError'''
     cmd = CommandCall(TestCommand)
-    o = Option('o', '-o')
+    o = OptionOccur('o')
     try: 
       result = cmd -o -o
       self.fail('should raise syntax error')
@@ -72,7 +72,7 @@ class CommandCallTestCase(unittest.TestCase):
     '''The option followed after commandcall must be an option of the Command'''
     from pyshin.tests.commands import CommandWithoutOption
     cmd = CommandCall(CommandWithoutOption)
-    o = Option('o', '-o')
+    o = OptionOccur('o')
     try:
       result = cmd -o
       self.fail('should check invalid option')
@@ -80,14 +80,37 @@ class CommandCallTestCase(unittest.TestCase):
     
   def test_addOptionToCommand(self):
     ''' Meeting with options should store value in the commandcall'''
-    a = Option('a', '-a')
+    #print 'begin test_addOptionToCommand'
+    a = OptionOccur('a')
     cmd = CommandCall(TestCommand)
+    #print 7687786,a
     result = cmd -a
     self.assertEqual(result.a, True)  
-    b = Option('b', '-b')
+    b = OptionOccur('b')
     cmd = CommandCall(TestCommand)
     result = cmd -b
     self.assertEqual(result.bb, False)  
+    c = OptionOccur('c')
+    cmd = CommandCall(TestCommand)
+    result = cmd -c
+    self.assertEqual(result.const_of_c, 'const_in_c_option_of_TestCommand')  
+
+    v = OptionOccur('v')
+    cmd = CommandCall(TestCommand)
+    result = cmd -v('given_value_in__call__')
+    self.assertEqual(result.v, 'given_value_in__call__')  
+
+    v = OptionOccur('v')
+    cmd = CommandCall(TestCommand)
+    #v.value = 'given_value_in__call__'
+    result = cmd -v=='given_value_in__call__'
+    self.assertEqual(result.v, 'given_value_in__call__')  
+
+    v = OptionOccur('v')
+    cmd = CommandCall(TestCommand)
+    result = cmd -v.readme.txt
+    self.assertEqual(result.v, 'readme.txt')  
+    
     
   def test_attr_arg(self):
     '''dotted name argument
