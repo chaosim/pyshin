@@ -451,21 +451,19 @@ class Option(Attribute):
 
         return 1
 
-# class Option
-
 class OptionOccur:
   '''Occurence of Option in the CommandCall
   出现在命令调用中的选项'''
   def __init__(self, name):
     self.name = name
   def __call__(self, value):
-##    print 3434432
+    '''-o(arg)'''
     self.value = value
     return self
   def __neg__(self):
+    '''for long option --opt'''
     return self
   def __getattr__(self, attr):
-##    print 435565656
     if attr=='value': 
       return self.__dict__[attr]
     try:
@@ -479,5 +477,7 @@ class OptionOccur:
   def __repr__(self):
     return '-%s'%self.name   
   __str__ = __repr__
+
+
  
     

@@ -1,17 +1,6 @@
 '''process calls on the commands, produce pipelines, execute the command with 
 options and arguments provided'''
 
-##def nameerror():
-##  try:
-##    a/b
-##  except:pass
-##  print 234324
-##  
-##nameerror()  
-##stop
-
-##from command import Command
-##stop
 from pyshin.option import Option, OptionContainer
 from pyshin.error import RepeatOptionError, InvalidOption
 
@@ -51,7 +40,7 @@ class CommandCallBase(object):
     '''all given option and arguments have been given just now,
     should execute the actual action of the command with them, 
     maybe print or don't print the result.'''
-    return 'call on %s'%self.command #repr(self.execute())
+    return 'call on %s'%self.command #repr(self.execute()) #wait everythiny is ready
 
   def __str__(self):
     '''the CommandCall should be executed according to its command with given 
@@ -88,16 +77,12 @@ class CommandCall(CommandCallBase):
      >>> cmd --help
      >>> cmd --file=='readme.txt'
      '''
-    #print 42314142, '__sub__ self.command.options', self.command.options
-    #print 6876876876, other
     if other.name not in self.command.options:
       raise InvalidOption
     if other in self.options:
       raise RepeatOptionError
     self.options.append(other)
-    #print 3443342, 'self.command.options[other.__name__]', self.command.options[other.__name__]
     cmdoption = self.command.options[other.name]
-    #print 43412423, other.__name__, self.command.options, cmdoption.dest, cmdoption.action# dir(cmdoption)
     action = cmdoption.action
     if action=='store_true':
       setattr(self, cmdoption.dest, True)
@@ -106,7 +91,6 @@ class CommandCall(CommandCallBase):
     elif action == "store_const":
       setattr(self, cmdoption.dest, cmdoption.const)
     if action == "store":
-      #print 'debuggging 23144231'
       try:
         setattr(self, cmdoption.dest, other.value)
       except:
@@ -137,65 +121,32 @@ class CommandCall(CommandCallBase):
 
     return self
   
-  def seebelow__eq__(self, other):
-    self.validateOptionValue(self.activeoption)
-    self.options[self.activeoption] = other
-
+# pause implementing this feature.
+  def xxx__div__(self, other):
+    '''DOS/Windows style option dir/h/w'''
+  
   def __eq__(self, other):
     '''a value should be assigned to previous option
     validity of the value to the option should be checked.
     >>> cmd --opt==asdf
     '''
     if self.whoWaitValue:
-      #self.whowaitValue = other
-      print 'self.whoWaitValue', self.whoWaitValue
       setattr(self, self.whoWaitValue, other)
       self.whoWaitValue = None
       return self
   
-  # maybe it shouldn't put here, maybe in class Option.
-  def xxx__neg__(self):
-    '''for long option'''
-    return x
-
-## DOS/Windows style option dir/h/w, pause implementing this feature.
-  def xxx__div__(self, other):
-    self.options.add(other)
-    return self
-  
-  
   def __call__(self, *arg, **kw):
-    '''one or more actual arguments should be added.'''
-    #print '__call__'
-    if self.call:
-      return self.call(*arg, **kw)
-    else: return self.execute(*arg, **kw)
-  
+    '''one or more actual arguments should be added.'''  
   
   def __getattr__(self, attr):
     '''maybe set argumets for the command call, it's up to the command of the call'''
-    # process class method
-    print 877687, self
-    print "self.__class__.__dict__:", self, self.__class__.__dict__
-    print 990, "self.__dict__:", self.__dict__ 
-    
     if attr in self.__class__.__dict__: 
       return self.__class__.__dict__[attr]
-    
-    # default attributes in the instances
-    # path.to.here
-    # verbose.yes
-    
     elif attr in self.__dict__:
       return self.__dict__[attr]
     else: 
-      print 2134443, attr
       raise AttributeError, attr
   
-  def xxx__coerce__(self, other):
-    '''prevent errors raising by __getattr__ and __or__'''
-    return self,other
-
 # ------------------------------------------------------------------------------
 # process Command Call Chain operator: > < |
   def __gt__(self, other):
@@ -212,19 +163,7 @@ class CommandCall(CommandCallBase):
   def __or__(self, other):
     '''cmda | cmdb
     produce CommandCallChain to implement pipeline'''
-    return CommandCallChain([self, other])
-
-  def XXX__nonzero__(self):
-    '''necessary for cmda and cmdb behaving like a command sequence
-    XXX can't do this, for __and__ simulating & operator
-    '''
-    return 0
-  
-  def XXX__and__(self, other):
-    '''produce CommandCallChain 
-    XXX can't do this, for __and__ simulating & operator'''
-    return CommandCallChain([self, other])
-      
+    return CommandCallChain([self, other])   
           
 class CommandCallChain(CommandCallBase):
   '''Calls chain of commands.'''
@@ -253,11 +192,6 @@ class CommandCallChain(CommandCallBase):
 
   __or__ = __gt__
 
-  def xxx__and__(self, other):
-    '''produce CommandCallChain 
-    XXX can't do this, for __and__ simulating & operator'''
-    self.calls.append(other)
-  
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def execute(self):
