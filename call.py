@@ -51,7 +51,7 @@ class CommandCallBase(object):
     '''all given option and arguments have been given just now,
     should execute the actual action of the command with them, 
     maybe print or don't print the result.'''
-    return repr(self.execute())
+    return 'call on %s'%self.command #repr(self.execute())
 
   def __str__(self):
     '''the CommandCall should be executed according to its command with given 
@@ -175,6 +175,10 @@ class CommandCall(CommandCallBase):
   def __getattr__(self, attr):
     '''maybe set argumets for the command call, it's up to the command of the call'''
     # process class method
+    print 877687, self
+    print "self.__class__.__dict__:", self, self.__class__.__dict__
+    print 990, "self.__dict__:", self.__dict__ 
+    
     if attr in self.__class__.__dict__: 
       return self.__class__.__dict__[attr]
     
@@ -254,21 +258,21 @@ class CommandCallChain(CommandCallBase):
     XXX can't do this, for __and__ simulating & operator'''
     self.calls.append(other)
   
+# ------------------------------------------------------------------------------
+# trig the execute of the call of the command
   def execute(self):
     for call in self.calls[:-1]:
       call.execute()
     self.calls[-1].execute()  
     #self.result = self.calls[-1].result
 
-# ------------------------------------------------------------------------------
-# trig the execute of the call of the command
   def __repr__(self):
-    '''all the CommandCall in the chain should be executed with their option and arguments.'''
-    return repr(self.execute())
+    '''all the CommandCall in the chain should be executed with their option and 
+    arguments and return the repr of the last result'''
+    return '%s'%self.calls #repr(self.execute())
   
+  
+  def __str__(self):
+    '''all the CommandCall in the chain should be executed with their option 
+    and arguments and return the str of the last result.'''
   __str__ = __repr__
-  
-##  def __str__(self):
-##    '''all the CommandCall in the chain should be executed with their option and arguments and return the last result.'''
-##    #print '__str__'
-##    return self.__repr__()

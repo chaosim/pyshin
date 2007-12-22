@@ -194,10 +194,10 @@ class Option(Attribute):
 
     # -- Constructor/initialization methods ----------------------------
 
-    def __init__(self, name, *opts, **attrs):
+    def __init__(self, *opts, **attrs):
         # Set _short_opts, _long_opts attrs from 'opts' tuple.
         # Have to be set now, in case no option strings are supplied.
-        Attribute.__init__(self, name)
+        Attribute.__init__(self, self.__class__.__name__)
         
         self._short_opts = []
         self._long_opts = []

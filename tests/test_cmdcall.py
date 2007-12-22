@@ -10,7 +10,7 @@ from pyshin.call import CommandCallChain
 from pyshin.option import Option, OptionOccur
 from pyshin.error import RepeatOptionError, InvalidOption
 
-from pyshin.tests.commands import TestCommand
+from pyshin.tests.commands import testCommand
 
 class CommandCallTestCase(unittest.TestCase):
 
@@ -54,14 +54,14 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_option(self):
     '''"cmd -o" should add the option o to cmd.options'''
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     o = OptionOccur('o')
     result = cmd -o
     self.assert_(o in cmd.options)
   
   def test_no_repeat_option(self):
     '''Meeting with options repeated should raise RepeatOptionError'''
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     o = OptionOccur('o')
     try: 
       result = cmd -o -o
@@ -70,14 +70,14 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_legal_option(self):
     '''The option followed after commandcall must be an option of the Command'''
-    from pyshin.tests.commands import CommandWithoutOption
-    cmd = CommandCall(CommandWithoutOption)
+    from pyshin.tests.commands import commandWithoutOption
+    cmd = CommandCall(commandWithoutOption)
     o = OptionOccur('o')
     try:
       result = cmd -o
       self.fail('should check invalid option')
     except InvalidOption: pass
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     u = OptionOccur('u')
     try:
       result = cmd -u
@@ -85,7 +85,7 @@ class CommandCallTestCase(unittest.TestCase):
     except InvalidOption: pass
 
   def xxxtest_long_short_option(self):
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     afd = OptionOccur('dsf')
     try:
       result = cmd --afd      
@@ -96,34 +96,34 @@ class CommandCallTestCase(unittest.TestCase):
     ''' Meeting with options should store value in the commandcall'''
     #print 'begin test_addOptionToCommand'
     a = OptionOccur('a')
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     #print 7687786,a
     result = cmd -a
     self.assertEqual(result.a, True)  
     
     b = OptionOccur('b')
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     result = cmd -b
     self.assertEqual(result.bb, False)  
     
     c = OptionOccur('c')
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     result = cmd -c
     self.assertEqual(result.const_of_c, 'const_in_c_option_of_TestCommand')  
 
     v = OptionOccur('v')
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     result = cmd -v('given_value_in__call__')
     self.assertEqual(result.v, 'given_value_in__call__')  
 
     v = OptionOccur('v')
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     #v.value = 'given_value_in__call__'
     result = cmd -v=='given_value_in__call__'
     self.assertEqual(result.v, 'given_value_in__call__')  
 
     v = OptionOccur('v')
-    cmd = CommandCall(TestCommand)
+    cmd = CommandCall(testCommand)
     result = cmd -v.readme.txt
     self.assertEqual(result.v, 'readme.txt')  
 
@@ -156,17 +156,17 @@ class CommandCallChainTestCase(unittest.TestCase):
       
   def test_executeAllCommandCall(self):
     '''Executing chain should execut every command in it'''
-    from pyshin.tests.commands import Command1, Command2, Command3
-    result = []
-    cmd1 = Command1()
-    cmd2 = Command2()
-    cmd3 = Command3()
+    from pyshin.tests.commands import command1, command2, command3
+    #result = []
+    cmd1 = command1()
+    cmd2 = command2()
+    cmd3 = command3()
     cmd1.execute()
-    print result
+    #print result
     chain = cmd1>cmd2>cmd3
-    print chain.calls
+    #print chain.calls
     chain.execute()
-    self.assertEqual(result, [1,2,3])
+    self.assertEqual(chain[-1].result, [1,2,3])
         
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),

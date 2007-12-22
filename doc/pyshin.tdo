@@ -17,7 +17,8 @@ done end:2007-12-20 20:47 process CommandCall
     done 2007-12-21 13:39 end:2007-12-21 14:19 some option can be given values like "cmd --option.value.value.value"
 
 todo 2007-12-21 22:01 !process CommandCallChain!
-  todo 2007-12-21 22:02 !Executing chain should executint every command in it!
+  done 2007-12-21 22:02 2007-12-22 20:19 Executing chain should execute every command in it
+    done 2007-12-22 13:12 2007-12-22 20:18 refactor to make Command become real class again
  
 todo 2007-12-21 21:25 !refactor Option class for not repeat option name!
 
