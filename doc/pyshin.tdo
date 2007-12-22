@@ -8,14 +8,19 @@ done end:2007-12-20 20:47 process CommandCall
   done end:2007-12-20 20:51 "cmd -o" should add the option o to cmd.options
   done end:2007-12-20 20:54 Meeting with options repeated should raise RepeatOptionError
   done end:2007-12-20 20:55 The option followed after commandcall must be an option of the Command
-  
-  todo doing 2007-12-20 21:23 !Meeting with options should store value in the commandcall!
+  todo 2007-12-21 21:15 ! Meeting long option should raise error if no long options in Command!  
+  done 2007-12-20 21:23 end:2007-12-21 21:02 Meeting with options should store value in the commandcall
     done end:2007-12-21 12:23 store_true and store_false with or without destination given should take action.
     done 2007-12-21 12:45 end:2007-12-21 12:50 store_const should store a const value given in the option of the command
-    done end:2007-12-21 13:24 action 'store' should store the value get from __call__
+    done end:2007-12-21 13:24 action 'store' should store the value get from __call__, just like cmd --option(value)
     done 2007-12-21 13:26 end:2007-12-21 13:36 Value can be given by ==, just like "cmd --option==value."
     done 2007-12-21 13:39 end:2007-12-21 14:19 some option can be given values like "cmd --option.value.value.value"
-    
+
+todo 2007-12-21 22:01 !process CommandCallChain!
+  todo 2007-12-21 22:02 !Executing chain should executint every command in it!
+ 
+todo 2007-12-21 21:25 !refactor Option class for not repeat option name!
+
 todo 2007-12-20 12:14 !cwd display current directory.!
 
 

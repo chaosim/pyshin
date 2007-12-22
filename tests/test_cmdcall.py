@@ -77,6 +77,20 @@ class CommandCallTestCase(unittest.TestCase):
       result = cmd -o
       self.fail('should check invalid option')
     except InvalidOption: pass
+    cmd = CommandCall(TestCommand)
+    u = OptionOccur('u')
+    try:
+      result = cmd -u
+      self.fail('should check invalid option')
+    except InvalidOption: pass
+
+  def xxxtest_long_short_option(self):
+    cmd = CommandCall(TestCommand)
+    afd = OptionOccur('dsf')
+    try:
+      result = cmd --afd      
+      self.fail('should check invalid option')
+    except InvalidOption: pass
     
   def test_addOptionToCommand(self):
     ''' Meeting with options should store value in the commandcall'''
@@ -86,10 +100,12 @@ class CommandCallTestCase(unittest.TestCase):
     #print 7687786,a
     result = cmd -a
     self.assertEqual(result.a, True)  
+    
     b = OptionOccur('b')
     cmd = CommandCall(TestCommand)
     result = cmd -b
     self.assertEqual(result.bb, False)  
+    
     c = OptionOccur('c')
     cmd = CommandCall(TestCommand)
     result = cmd -c
@@ -110,8 +126,7 @@ class CommandCallTestCase(unittest.TestCase):
     cmd = CommandCall(TestCommand)
     result = cmd -v.readme.txt
     self.assertEqual(result.v, 'readme.txt')  
-    
-    
+
   def test_attr_arg(self):
     '''dotted name argument
 
@@ -134,9 +149,28 @@ class CommandCallTestCase(unittest.TestCase):
     >>> open.readme.txt.path
     'readme.txt'
     '''
-    
+
+class CommandCallChainTestCase(unittest.TestCase):
+  def setUp(self):
+    pass
+      
+  def test_executeAllCommandCall(self):
+    '''Executing chain should execut every command in it'''
+    from pyshin.tests.commands import Command1, Command2, Command3
+    result = []
+    cmd1 = Command1()
+    cmd2 = Command2()
+    cmd3 = Command3()
+    cmd1.execute()
+    print result
+    chain = cmd1>cmd2>cmd3
+    print chain.calls
+    chain.execute()
+    self.assertEqual(result, [1,2,3])
+        
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
+          unittest.makeSuite(CommandCallChainTestCase)
           #DocTestSuite('pyshin.tests.test_command'),  
          ))
   return suite

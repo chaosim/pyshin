@@ -51,10 +51,11 @@ class CommandCallBase(object):
     '''all given option and arguments have been given just now,
     should execute the actual action of the command with them, 
     maybe print or don't print the result.'''
-    return self.execute()
+    return repr(self.execute())
 
   def __str__(self):
-    '''the CommandCall should be executed according to its command with given option and arguments and print the result.'''  
+    '''the CommandCall should be executed according to its command with given 
+    option and arguments and print the result.'''  
   __str__ = __repr__
 
 class CommandCall(CommandCallBase):
@@ -257,13 +258,13 @@ class CommandCallChain(CommandCallBase):
     for call in self.calls[:-1]:
       call.execute()
     self.calls[-1].execute()  
-    self.result = self.calls[-1].result
-            
+    #self.result = self.calls[-1].result
+
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def __repr__(self):
     '''all the CommandCall in the chain should be executed with their option and arguments.'''
-    return self.execute()
+    return repr(self.execute())
   
   __str__ = __repr__
   

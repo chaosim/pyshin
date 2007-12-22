@@ -198,6 +198,7 @@ class Option(Attribute):
         # Set _short_opts, _long_opts attrs from 'opts' tuple.
         # Have to be set now, in case no option strings are supplied.
         Attribute.__init__(self, name)
+        
         self._short_opts = []
         self._long_opts = []
         opts = self._check_opt_strings(opts)
@@ -458,7 +459,10 @@ class OptionOccur:
   def __init__(self, name):
     self.name = name
   def __call__(self, value):
+##    print 3434432
     self.value = value
+    return self
+  def __neg__(self):
     return self
   def __getattr__(self, attr):
 ##    print 435565656
@@ -472,6 +476,8 @@ class OptionOccur:
       except:
         self.__dict__['value'] = attr
       return self
-      
+  def __repr__(self):
+    return '-%s'%self.name   
+  __str__ = __repr__
  
     
