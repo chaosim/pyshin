@@ -13,6 +13,9 @@ class PyshinSyntaxError(PyshinError):
   '''
   pass
 
+class ShouldBeShortOption(PyshinSyntaxError):
+  '''should not meet minus before a short option'''
+  
 class RepeatOptionError(PyshinSyntaxError):pass
 
 class OutofRange(PyshinError):

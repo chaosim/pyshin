@@ -5,9 +5,6 @@ h = Option('-h')
 w = Option('-w')
 v = Option('-v')
 
-global x
-x = 30
-
 class CommandWithoutOption(Command):
   pass
 commandWithoutOption = CommandWithoutOption() 
@@ -20,21 +17,25 @@ class TestCommandBase(Command):
 class TestCommand(TestCommandBase):
   c = Option('-c', action='store_const', dest="const_of_c", const='const_in_c_option_of_TestCommand')  
   v = Option('-v', action='store')
+  longopt = Option('--longopt')
 
 testCommand = TestCommand()
   
 class Command1(Command):
   value = 1
   result = []
-  def execute(self):
-    #print 4454, self.command.__name__
-    self.result.append(self.value)
+  def action(self):
+    print 'command1 is executed.'
 command1 = Command1()
 
 class Command2(Command1):
   value = 2
+  def action(self):
+    print 'command2 is executed.'
 command2 = Command2()
   
 class Command3(Command2):
   value = 3
+  def action(self):
+    print 'command3 is executed.'
 command3 = Command3()

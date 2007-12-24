@@ -451,7 +451,7 @@ class Option(Attribute):
 
         return 1
 
-class OptionOccur:
+class OptionOccur(object):
   '''Occurence of Option in the CommandCall
   出现在命令调用中的选项'''
   def __init__(self, name):
@@ -462,7 +462,8 @@ class OptionOccur:
     return self
   def __neg__(self):
     '''for long option --opt'''
-    return self
+    self.__class__ = LongOptionOccur
+    return 
   def __getattr__(self, attr):
     if attr=='value': 
       return self.__dict__[attr]
@@ -477,6 +478,24 @@ class OptionOccur:
   def __repr__(self):
     return '-%s'%self.name   
   __str__ = __repr__
+
+class ShortOptionOccur(OptionOccur):
+  def __neg__(self):
+    from pyshin.error import ShouldBeShortOption
+    raise ShouldBeShortOption, self
+    
+class LongOptionOccur(OptionOccur):
+  def __init__(self, name):
+    super(self.__class__, self).__init__(name)
+    self.havePrecededMinus = False
+    
+  def __neg__(self):
+    if not self.havePrecededMinus:
+      self.havePrecededMinus = True
+      return self
+    else:
+      from pyshin.error import PyshinSyntaxError
+      raise PyshinSyntaxError, self
 
 
  

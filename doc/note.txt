@@ -1,0 +1,7 @@
+2007-12-23 14:08
+Data attributes of the command call should copy the value from the command.
+
+2007-12-24 12:58 
+python 中可以用级联的比较符，但是无法用其组合
+只好改用左移右移运算符了。>>, <<
+这样更好, 与其它操作符更一致， 也更符合移位的意思。- -- == << >> | 

@@ -43,7 +43,7 @@ class Command(object):
       self._processClassAttributes(c)
     for attr, value in cls.__dict__.items():
       if (attr in Base__dict__(Command) and 
-          attr not in ['execute']):#'__init__', '__call__', '__repr__' 
+          attr not in ['action']):#'execute', , '__init__', '__call__', '__repr__' 
         continue
       if isinstance(value, Option):
         self.options[attr]=value
@@ -52,7 +52,10 @@ class Command(object):
       else: 
         self.dataAttributes[attr] = value
 
-  def execute(self ):# Maybe I should disable arguments to execute , *arg, **kw
+  def execute(self ):
+    '''any command instance should overload this method'''
+  
+  def action(self ):
     '''any command instance should overload this method'''
   
   def __call__(self): #, *arg, **args
@@ -60,15 +63,17 @@ class Command(object):
     may be overloaded by actual command'''
     
     from call import CommandCall
+    from copy import deepcopy
+    
     cmdcall = CommandCall(self)
     for attr, value in self.cmdcallMethods.items():
       setattr(cmdcall, attr, bind(value, cmdcall)) 
     for attr, value in self.dataAttributes.items():
-      setattr(cmdcall, attr, value)
+      setattr(cmdcall, attr, deepcopy(value))
     return cmdcall
   
   def __repr__(self):
-    return self.__name__
+    return self.__class__.__name__
 
 def rebind(method, obj):
   import new

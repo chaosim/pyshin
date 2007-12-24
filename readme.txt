@@ -17,11 +17,11 @@ Get Started
     
   And then, some commands used most frequently.
   
-    >>> cd(r'e:\zope3\lib\python\pyshin')
+    XXX >>> cd(r'e:\zope3\lib\python\pyshin')
     e:\zope3\lib\python\pyshin
-    >>> cd
+    XXX >>> cd
     e:\zope3\lib\python\pyshin
-    >>> cwd
+    XXX >>> cwd
     e:\zope3\lib\python\pyshin
 
     XXX >>> from pyshin.shell import Shell
@@ -35,11 +35,11 @@ Get Started
     XXX >>> cwd
     e:\zope3\lib\python\pyshin
 
-    >>> dir(r'e:\zope3\lib\python\pyshin\tests\testdir')
+    XXX >>> dir(r'e:\zope3\lib\python\pyshin\tests\testdir')
     ['1.txt', '2.txt']
-    >>> cd(r'e:\zope3\lib\python\pyshin\tests\testdir')
+    XXX >>> cd(r'e:\zope3\lib\python\pyshin\tests\testdir')
     e:\zope3\lib\python\pyshin\tests\testdir
-    >>> dir
+    XXX >>> dir
     ['1.txt', '2.txt']
 
 Advance Uses

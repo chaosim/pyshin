@@ -9,33 +9,15 @@ class CommandCallBase(object):
   ''' trig the execution by repr(and str? )
   '''  
   def __init__(self):
-    pass
+    self.executed = False
 
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
-  def xxx_execute(self, *arg, **kw):    
+  def execute(self):    
     '''the call of the command shouldn't know how to execute itself, this task should
     be dispatch to the command'''
-     
-    #print 'execute', self.options
-    
-    result = 'run with'
-    if v in self.options:
-      result = 'run with more verbose and tab = 4'
-      if w in self.options:
-        result += ' and tab = 4'
-    elif w in self.options:
-      result += ' with tab = 4'
-    else:
-      result += 'default'
-    if h in self.options:
-      result = '''  usage: cmd1 options .file==name .path==path
-  options: 
-  -v, --verbose: display verbose information
-  -w: set tabwidth to 4
-  /h, /help, -h, --help: display this help infomation'''
-    return result
-  
+    self.executed = True
+   
   def __repr__(self):
     '''all given option and arguments have been given just now,
     should execute the actual action of the command with them, 
@@ -61,6 +43,7 @@ class CommandCall(CommandCallBase):
     super(CommandCall,self).__init__()
     self.command = command
     self.output = None
+    self.input = None
     self.options = []
 
 # --------------------------------------------------------------------
@@ -77,10 +60,16 @@ class CommandCall(CommandCallBase):
      >>> cmd --help
      >>> cmd --file=='readme.txt'
      '''
+    
     if other.name not in self.command.options:
+      print 'other.name:', other.name, 'self.command.options', self.command.options
       raise InvalidOption
     if other in self.options:
       raise RepeatOptionError
+    from pyshin.option import LongOptionOccur
+    from pyshin.error import PyshinSyntaxError
+    if isinstance(other, LongOptionOccur) and not other.havePrecededMinus:
+      raise PyshinSyntaxError, 'should have two minus before long option'
     self.options.append(other)
     cmdoption = self.command.options[other.name]
     action = cmdoption.action
@@ -149,21 +138,37 @@ class CommandCall(CommandCallBase):
   
 # ------------------------------------------------------------------------------
 # process Command Call Chain operator: > < |
-  def __gt__(self, other):
+  def __rshift__(self, other):
     '''cmda > cmdb
     produce CommandCallChain to implement pipeline'''
-    other.input = self.output
+    other.input = self#.output
     return CommandCallChain([self, other])
-
-  def __lt__(self, other):
-    '''cmda < cmdb
-    produce CommandCallChain to implement pipeline'''
-    return CommandCallChain([self, other])
-    
   def __or__(self, other):
     '''cmda | cmdb
     produce CommandCallChain to implement pipeline'''
-    return CommandCallChain([self, other])   
+  __or__ = __rshift__
+
+  def __lshift__(self, other):
+    '''cmda < cmdb
+    produce CommandCallChain to implement pipeline'''
+    self.input = other#.output
+    return CommandCallChain([self, other])
+
+# ------------------------------------------------------------------------------
+# trig the execute of the call of the command
+  def execute(self):
+    if not self.executed:
+      if self.input is not None:
+        self.input.execute()
+      self.action()
+      self.executed = True
+  
+##  def copy(self):
+##    cmdcall = self.command()
+##    cmdcall.executed = self.executed
+##    cmdcall.options = copy(self.options)
+##    cmdcall.input = copy(self.input)
+##    cmdcall.output = copy(self.output)
           
 class CommandCallChain(CommandCallBase):
   '''Calls chain of commands.'''
@@ -178,33 +183,40 @@ class CommandCallChain(CommandCallBase):
   def __getitem__(self,index):
     return self.calls[index]
   
-  def __gt__(self, other):
-    '''process things relating to pipeline'''
-    other.input = self.calls[-1].output
+  def __rshift__(self, other):
+    '''cmd1 > cmd2: pipeline operator'''
+    other.input = self.calls[-1]#.output
     self.calls.append(other)
     return self
+  
+  def __or__(self, other):
+    '''cmd1 | cmd2: pipeline operator'''
+  __or__ = __rshift__
 
-  def __lt__(self, other):
-    '''process things relating to pipeline'''
-    self.calls[-1].input = other.output
+  def __lshift__(self, other):
+    '''cmd1 < cmd2: pipeline operator'''
+    #print 4123214, self.calls, other
+    self.calls[-1].input = other#.output
     self.calls.append(other)
+    
     return self
 
-  __or__ = __gt__
 
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def execute(self):
-    for call in self.calls[:-1]:
+    #print self.calls
+    for call in self.calls:#[:-1]
+      #print call
       call.execute()
-    self.calls[-1].execute()  
+    #self.calls[-1].execute() 
+    #self.executed = True
     #self.result = self.calls[-1].result
 
   def __repr__(self):
     '''all the CommandCall in the chain should be executed with their option and 
     arguments and return the repr of the last result'''
     return '%s'%self.calls #repr(self.execute())
-  
   
   def __str__(self):
     '''all the CommandCall in the chain should be executed with their option 

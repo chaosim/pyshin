@@ -21,7 +21,7 @@ class CommandCallTestCase(unittest.TestCase):
     # xxx wait some other done correctly.
     cmda = CommandCall('a')
     cmdb = CommandCall('b')                
-    self.assertRaises(exceptions.TypeError, repr, cmda)
+    self.assertRaises(exceptions.TypeError, repr, cmda) #???
   
   def test_pipeline_operator(self):
     '''Pipeline operators | > < should produce CommandCallChain'''
@@ -31,12 +31,12 @@ class CommandCallTestCase(unittest.TestCase):
     result = cmda | cmdb
     self.assert_(isinstance(result, CommandCallChain))
     self.assert_((result[0] is cmda) and (result[1] is cmdb))
-    # a > b 
-    result =cmda > cmdb
+    # a >> b 
+    result =cmda >> cmdb
     self.assert_(isinstance(result, CommandCallChain))
     self.assert_((result[0] is cmda) and (result[1] is cmdb))
-    # a < b 
-    result = cmda < cmdb
+    # a << b 
+    result = cmda << cmdb
     self.assert_(isinstance(result, CommandCallChain))
     self.assert_((result[0] is cmda) and (result[1] is cmdb))
     
@@ -45,8 +45,8 @@ class CommandCallTestCase(unittest.TestCase):
     前一个命令的输入成为后一个命令的输入'''
     cmda = CommandCall('a')
     cmdb = CommandCall('b')                
-    chain = cmda > cmdb
-    self.assert_(cmdb.input is cmda.output)
+    chain = cmda >> cmdb
+    self.assert_(cmdb.input is cmda)#.output
 
   def xxxtest__and__(self):
     result = self.cmda and self.cmdb
@@ -84,13 +84,31 @@ class CommandCallTestCase(unittest.TestCase):
       self.fail('should check invalid option')
     except InvalidOption: pass
 
-  def xxxtest_long_short_option(self):
-    cmd = CommandCall(testCommand)
-    afd = OptionOccur('dsf')
+  def test_long_short_option(self):
+    from pyshin.option import LongOptionOccur, ShortOptionOccur
+    from pyshin.error import PyshinSyntaxError
+    from pyshin.error import ShouldBeShortOption
+
+    o = ShortOptionOccur('-o')
     try:
-      result = cmd --afd      
+      -o      
       self.fail('should check invalid option')
-    except InvalidOption: pass
+    except ShouldBeShortOption: pass
+
+    longopt = LongOptionOccur('longopt')
+    try:
+      --longopt      
+      self.fail('should check too many minus')
+    except PyshinSyntaxError, e: 
+      pass
+
+    cmd = CommandCall(testCommand)
+    longopt = LongOptionOccur('longopt')
+    try:
+      cmd-longopt      
+      self.fail('should check too few minus')
+    except PyshinSyntaxError, e: 
+      pass
     
   def test_addOptionToCommand(self):
     ''' Meeting with options should store value in the commandcall'''
@@ -127,10 +145,17 @@ class CommandCallTestCase(unittest.TestCase):
     result = cmd -v.readme.txt
     self.assertEqual(result.v, 'readme.txt')  
 
+  def wait_test_state_of_executed(self):
+    '''the state of 'executed' should change after the call is executed.'''
+    cmd = testCommand()
+    self.assertEqual(cmd.executed, False)
+    cmd.execute()
+    self.assertEqual(cmd.executed, True)
+    
   def test_attr_arg(self):
     '''dotted name argument
 
-    >>> class _Open(CommandCall):
+    xxx>>> class _Open(CommandCall):
     ...   """should base on Command class which allow dotted path filename as arguments"""
     ...   def __init__(self):
     ...     super(_Open, self).__init__(None, None)
@@ -145,8 +170,8 @@ class CommandCallTestCase(unittest.TestCase):
     ...         self.path += '.'+attr
     ...       return self
     
-    >>> open = _Open()
-    >>> open.readme.txt.path
+    xxx>>> open = _Open()
+    xxx>>> open.readme.txt.path
     'readme.txt'
     '''
 
@@ -155,23 +180,37 @@ class CommandCallChainTestCase(unittest.TestCase):
     pass
       
   def test_executeAllCommandCall(self):
-    '''Executing chain should execut every command in it'''
-    from pyshin.tests.commands import command1, command2, command3
-    #result = []
-    cmd1 = command1()
-    cmd2 = command2()
-    cmd3 = command3()
-    cmd1.execute()
-    #print result
-    chain = cmd1>cmd2>cmd3
-    #print chain.calls
-    chain.execute()
-    self.assertEqual(chain[-1].result, [1,2,3])
+    '''Executing chain should execut every command in it
+    >>> from pyshin.tests.commands import command1, command2
+    >>> cmd1 = command1()
+    >>> cmd2 = command2()
+    >>> chain = cmd1>>cmd2
+    >>> chain.execute()
+    command1 is executed.
+    command2 is executed.
+    '''
+  def wait_test_executeCommandCallAccordingToDirection(self):
+    '''Execute commands according the direction of the pipeline
+    >>> from pyshin.tests.commands import command1, command2, command3
+    >>> cmd1 = command1()
+    >>> cmd2 = command2()
+    >>> cmd3 = command3()
+    >>> chain = cmd1<<cmd2<<cmd3
+    
+    >>> print chain
+    [call on Command1, call on Command2, call on Command3]
+    
+    >>> chain.execute()
+    command3 is executed.
+    command2 is executed.
+    command1 is executed.
+    '''
         
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
-          unittest.makeSuite(CommandCallChainTestCase)
-          #DocTestSuite('pyshin.tests.test_command'),  
+          unittest.makeSuite(CommandCallChainTestCase),
+          DocTestSuite('pyshin.tests.test_cmdcall', 
+                     optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS),  
          ))
   return suite
 

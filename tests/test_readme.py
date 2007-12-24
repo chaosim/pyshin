@@ -5,9 +5,9 @@ from zope.testing import doctest
 
 def test_suite():
     suite = unittest.TestSuite((
-##                DocFileSuite('..\\readme.txt',
-##                     optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
-##                     ),
+                DocFileSuite('..\\readme.txt',
+                     optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
+                     ),
            ))
     return suite
 
