@@ -1,7 +1,7 @@
 from error import OptionError
 from base import Attribute
 
-class OptionContainer:
+class xxxOptionContainer:
   '''the container of the options provided in the CommandCall'''
   def __init__(self):
     self.options = []
@@ -15,7 +15,7 @@ class OptionContainer:
   def __getitem__(self, index):
     return self.options[index]
 
-class OptionGroup:
+class xxxOptionGroup:
   '''a Group of Option '''
   def __sub__(self, other):
     return OptionGroup(self, other)
@@ -51,7 +51,7 @@ class xxxOption: #use the one from optparse.py for the moment.
   def __str__(self):
     return 'option %s'%self.name
   
-# ======================
+# =========================================================================
 # from python24\lib\optparse.py
 
 # Not supplying a default is different from a default of None,
@@ -312,7 +312,6 @@ class Option(Attribute):
         takes_value = (self.action in self.STORE_ACTIONS or
                        self.type is not None)
         if self.dest is None and takes_value:
-
             # Glean a destination from the first long option string,
             # or from the first short option string if no long options.
             if self._long_opts:
@@ -450,31 +449,40 @@ class Option(Attribute):
             raise RuntimeError, "unknown action %r" % self.action
 
         return 1
-
+    def needValue(self):
+      return self.action in ['store', 'append', 'count']
+    
+from pyshin.error import OptionShouldnotHaveValue
 class OptionOccur(object):
   '''Occurence of Option in the CommandCall
   出现在命令调用中的选项'''
-  def __init__(self, name):
+  def __init__(self, name, option=None):
     self.name = name
+    self.option = option
+    
   def __call__(self, value):
     '''-o(arg)'''
-    self.value = value
+    if self.option.needValue():
+      self.value = value
+    else: raise OptionShouldnotHaveValue
     return self
   def __neg__(self):
     '''for long option --opt'''
-    self.__class__ = LongOptionOccur
-    return 
+  
   def __getattr__(self, attr):
     if attr=='value': 
       return self.__dict__[attr]
     try:
       return self.__dict__[attr]
     except:
+      if not self.option.needValue():        
+        raise OptionShouldnotHaveValue
       try: 
         self.__dict__['value'] +='.'+attr
       except:
         self.__dict__['value'] = attr
       return self
+  
   def __repr__(self):
     return '-%s'%self.name   
   __str__ = __repr__

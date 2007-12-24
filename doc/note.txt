@@ -2,6 +2,9 @@
 Data attributes of the command call should copy the value from the command.
 
 2007-12-24 12:58 
-python 中可以用级联的比较符，但是无法用其组合
-只好改用左移右移运算符了。>>, <<
-这样更好, 与其它操作符更一致， 也更符合移位的意思。- -- == << >> | 
+the comarision operator can be concatenated in python, but the meaning have some subtle difference with other operator.
+So I can not make pipeline with them. Just use the left shift and right shift operator << >> instead.
+This is better. pipeline implies shift. - -- == << >> | 
+
+2007-12-24 18:01
+The CommandClass can be used to refactoring optparse more elegantly.

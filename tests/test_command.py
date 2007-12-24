@@ -5,16 +5,16 @@ from zope.testing import doctest
 
 import exceptions
 
-from pyshin.command import Command
+from pyshin.command import command
 from pyshin.option import Option#, OptionInstance
 #from pyshin.base import fromFunction
 from pyshin.call import CommandCall
 
-class CmdA(Command):
+class CmdA(command):
   a = Option('-a')
   value = 1
   def action(self):return 'CmdA.action'
-cmdA = CmdA()
+cmdA = CmdA
 
 class CommandTestCase(unittest.TestCase):
 
@@ -22,7 +22,7 @@ class CommandTestCase(unittest.TestCase):
     pass
       
   def xxxtest_CommandClassDefine(self):
-    ''' class X(Command) should produce an instance of CommandClass'''
+    ''' class X(command) should produce an instance of CommandClass'''
     #self.assertEqual(CmdA.__name__, 'CmdA')
     #self.assertEqual(CmdA.__class__, CommandClass)
 
@@ -44,12 +44,23 @@ class CommandTestCase(unittest.TestCase):
     self.assertNotEqual(cmdcall.value, cmdA.value)
     
   def test_CommandMethod(self):
-    '''"Method" in Command is just a function and becomes the method of the 
+    '''"Method" in command is just a function and becomes the method of the 
     instance of CommandCall'''
     def f():pass
     self.assertEqual(type(cmdA.cmdcallMethods['action']), type(f))
     result = cmdA()
     self.assertEqual(result.action(), 'CmdA.action')
+  
+  def test__getattr_arg(self):
+    class open(command):
+      filename = ''
+      def saveAttributeArgument(self, attr):
+        #print '54524352353, self.filename', self.filename
+        if self.filename=='':
+          self.filename += attr
+        else: self.filename += '.' + attr
+    result = open.readme.txt
+    self.assertEqual(result.filename, 'readme.txt')  
    
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandTestCase),

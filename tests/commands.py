@@ -1,41 +1,32 @@
+'''materials made for test'''
 
-from pyshin.command import Command
+from pyshin.command import command
 from pyshin.option import Option
-h = Option('-h')
-w = Option('-w')
-v = Option('-v')
 
-class CommandWithoutOption(Command):
+##h = Option('-h')
+##w = Option('-w')
+##v = Option('-v')
+
+class CommandWithoutOption(command):
   pass
-commandWithoutOption = CommandWithoutOption() 
 
-class TestCommandBase(Command):
+class TestCommandBase(command):
   o = Option('-o', action='store_true')
   a = Option('-a', action='store_true')
-  b = Option('-b', action='store_false', dest="bb")  
+  b = Option('-b', action='store_false', dest='bb')  
  
 class TestCommand(TestCommandBase):
   c = Option('-c', action='store_const', dest="const_of_c", const='const_in_c_option_of_TestCommand')  
   v = Option('-v', action='store')
   longopt = Option('--longopt')
-
-testCommand = TestCommand()
   
-class Command1(Command):
+
+class command1(command):
   value = 1
   result = []
   def action(self):
-    print 'command1 is executed.'
-command1 = Command1()
+    print self.command.__name__,
 
-class Command2(Command1):
-  value = 2
-  def action(self):
-    print 'command2 is executed.'
-command2 = Command2()
-  
-class Command3(Command2):
-  value = 3
-  def action(self):
-    print 'command3 is executed.'
-command3 = Command3()
+class command2(command1):pass
+
+class command3(command2):pass

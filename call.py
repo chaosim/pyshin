@@ -1,9 +1,9 @@
 '''process calls on the commands, produce pipelines, execute the command with 
 options and arguments provided'''
 
-from pyshin.option import Option, OptionContainer
-from pyshin.error import RepeatOptionError, InvalidOption
-
+from option import Option#, OptionContainer
+from error import RepeatOptionError, InvalidOption
+from command import CommandClass
 
 class CommandCallBase(object):
   ''' trig the execution by repr(and str? )
@@ -44,6 +44,7 @@ class CommandCall(CommandCallBase):
     self.command = command
     self.output = None
     self.input = None
+    self.whoWaitValue = None # the dest of the current option which is absense of value
     self.options = []
 
 # --------------------------------------------------------------------
@@ -62,7 +63,7 @@ class CommandCall(CommandCallBase):
      '''
     
     if other.name not in self.command.options:
-      print 'other.name:', other.name, 'self.command.options', self.command.options
+      #print '8760988, other.name', other.name, 'self.command.options', self.command.options
       raise InvalidOption
     if other in self.options:
       raise RepeatOptionError
@@ -119,10 +120,12 @@ class CommandCall(CommandCallBase):
     validity of the value to the option should be checked.
     >>> cmd --opt==asdf
     '''
+    from pyshin.error import OptionShouldnotHaveValue
     if self.whoWaitValue:
       setattr(self, self.whoWaitValue, other)
       self.whoWaitValue = None
       return self
+    else: raise OptionShouldnotHaveValue
   
   def __call__(self, *arg, **kw):
     '''one or more actual arguments should be added.'''  
@@ -133,13 +136,17 @@ class CommandCall(CommandCallBase):
       return self.__class__.__dict__[attr]
     elif attr in self.__dict__:
       return self.__dict__[attr]
+    #elif attr in self.
     else: 
-      raise AttributeError, attr
+      self.saveAttributeArgument(attr)
+      return self
   
+  def saveAttributeArgument(self, attr):
+    raise AttributeError, attr
 # ------------------------------------------------------------------------------
-# process Command Call Chain operator: > < |
+# process Command Call Chain operator: >> << |
   def __rshift__(self, other):
-    '''cmda > cmdb
+    '''cmda >> cmdb
     produce CommandCallChain to implement pipeline'''
     other.input = self#.output
     return CommandCallChain([self, other])
@@ -149,7 +156,7 @@ class CommandCall(CommandCallBase):
   __or__ = __rshift__
 
   def __lshift__(self, other):
-    '''cmda < cmdb
+    '''cmda << cmdb
     produce CommandCallChain to implement pipeline'''
     self.input = other#.output
     return CommandCallChain([self, other])
@@ -184,7 +191,9 @@ class CommandCallChain(CommandCallBase):
     return self.calls[index]
   
   def __rshift__(self, other):
-    '''cmd1 > cmd2: pipeline operator'''
+    '''cmd1 >> cmd2: pipeline operator'''
+    if isinstance(other, CommandClass):
+      other = other()
     other.input = self.calls[-1]#.output
     self.calls.append(other)
     return self
@@ -194,8 +203,9 @@ class CommandCallChain(CommandCallBase):
   __or__ = __rshift__
 
   def __lshift__(self, other):
-    '''cmd1 < cmd2: pipeline operator'''
-    #print 4123214, self.calls, other
+    '''cmd1 << cmd2: pipeline operator'''
+    if isinstance(other, CommandClass):
+      other = other()
     self.calls[-1].input = other#.output
     self.calls.append(other)
     

@@ -5,12 +5,12 @@ from zope.testing import doctest
 
 import exceptions
 
-from pyshin.call import CommandCall
-from pyshin.call import CommandCallChain
-from pyshin.option import Option, OptionOccur
+from pyshin.command import command
+from pyshin.call import CommandCall, CommandCallChain
+from pyshin.option import Option, OptionOccur, ShortOptionOccur
 from pyshin.error import RepeatOptionError, InvalidOption
 
-from pyshin.tests.commands import testCommand
+from pyshin.tests.commands import TestCommand
 
 class CommandCallTestCase(unittest.TestCase):
 
@@ -54,14 +54,14 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_option(self):
     '''"cmd -o" should add the option o to cmd.options'''
-    cmd = CommandCall(testCommand)
+    cmd = CommandCall(TestCommand)
     o = OptionOccur('o')
     result = cmd -o
     self.assert_(o in cmd.options)
   
   def test_no_repeat_option(self):
     '''Meeting with options repeated should raise RepeatOptionError'''
-    cmd = CommandCall(testCommand)
+    cmd = CommandCall(TestCommand)
     o = OptionOccur('o')
     try: 
       result = cmd -o -o
@@ -69,15 +69,15 @@ class CommandCallTestCase(unittest.TestCase):
     except RepeatOptionError: pass
   
   def test_legal_option(self):
-    '''The option followed after commandcall must be an option of the Command'''
-    from pyshin.tests.commands import commandWithoutOption
-    cmd = CommandCall(commandWithoutOption)
+    '''The option followed after Commandcall must be an option of the Command'''
+    from pyshin.tests.commands import CommandWithoutOption
+    cmd = CommandCall(CommandWithoutOption)
     o = OptionOccur('o')
     try:
       result = cmd -o
       self.fail('should check invalid option')
     except InvalidOption: pass
-    cmd = CommandCall(testCommand)
+    cmd = CommandCall(TestCommand)
     u = OptionOccur('u')
     try:
       result = cmd -u
@@ -102,7 +102,7 @@ class CommandCallTestCase(unittest.TestCase):
     except PyshinSyntaxError, e: 
       pass
 
-    cmd = CommandCall(testCommand)
+    cmd = CommandCall(TestCommand)
     longopt = LongOptionOccur('longopt')
     try:
       cmd-longopt      
@@ -111,43 +111,40 @@ class CommandCallTestCase(unittest.TestCase):
       pass
     
   def test_addOptionToCommand(self):
-    ''' Meeting with options should store value in the commandcall'''
-    #print 'begin test_addOptionToCommand'
+    ''' Meeting with options should store value in the Commandcall'''
     a = OptionOccur('a')
-    cmd = CommandCall(testCommand)
-    #print 7687786,a
+    cmd = CommandCall(TestCommand)
     result = cmd -a
     self.assertEqual(result.a, True)  
     
     b = OptionOccur('b')
-    cmd = CommandCall(testCommand)
+    cmd = CommandCall(TestCommand)
     result = cmd -b
     self.assertEqual(result.bb, False)  
     
     c = OptionOccur('c')
-    cmd = CommandCall(testCommand)
+    cmd = CommandCall(TestCommand)
     result = cmd -c
     self.assertEqual(result.const_of_c, 'const_in_c_option_of_TestCommand')  
 
-    v = OptionOccur('v')
-    cmd = CommandCall(testCommand)
+    v = OptionOccur('v', TestCommand.options['v'])
+    cmd = CommandCall(TestCommand)
     result = cmd -v('given_value_in__call__')
     self.assertEqual(result.v, 'given_value_in__call__')  
 
     v = OptionOccur('v')
-    cmd = CommandCall(testCommand)
-    #v.value = 'given_value_in__call__'
+    cmd = CommandCall(TestCommand)
     result = cmd -v=='given_value_in__call__'
     self.assertEqual(result.v, 'given_value_in__call__')  
 
-    v = OptionOccur('v')
-    cmd = CommandCall(testCommand)
+    v = OptionOccur('v', TestCommand.options['v'])
+    cmd = CommandCall(TestCommand)
     result = cmd -v.readme.txt
     self.assertEqual(result.v, 'readme.txt')  
 
   def wait_test_state_of_executed(self):
     '''the state of 'executed' should change after the call is executed.'''
-    cmd = testCommand()
+    cmd = TestCommand()
     self.assertEqual(cmd.executed, False)
     cmd.execute()
     self.assertEqual(cmd.executed, True)
@@ -180,14 +177,13 @@ class CommandCallChainTestCase(unittest.TestCase):
     pass
       
   def test_executeAllCommandCall(self):
-    '''Executing chain should execut every command in it
+    '''Executing chain should execut every Command in it
     >>> from pyshin.tests.commands import command1, command2
-    >>> cmd1 = command1()
-    >>> cmd2 = command2()
+    >>> cmd1 = command1
+    >>> cmd2 = command2
     >>> chain = cmd1>>cmd2
     >>> chain.execute()
-    command1 is executed.
-    command2 is executed.
+    command1 command2
     '''
   def wait_test_executeCommandCallAccordingToDirection(self):
     '''Execute commands according the direction of the pipeline
@@ -198,20 +194,57 @@ class CommandCallChainTestCase(unittest.TestCase):
     >>> chain = cmd1<<cmd2<<cmd3
     
     >>> print chain
-    [call on Command1, call on Command2, call on Command3]
+    [call on command1, call on command2, call on command3]
     
     >>> chain.execute()
-    command3 is executed.
-    command2 is executed.
-    command1 is executed.
+    command3 command2 command1
+    
+    >>> chain = command1<<command2>>command3
+    >>> chain.execute()
+    command2 command1 command3
     '''
-        
+
+class OptionTestCase(unittest.TestCase):
+  '''test usage of option'''        
+  def test_OptionWithoutValue(self):
+    '''if the option need no value, should disable __call__, __getattr__ 
+    and __eq__'''
+    from pyshin.error import OptionShouldnotHaveValue
+    opt = Option('-o', action='store_true')
+    #print opt.dest
+    #opt.dest = None
+    o = OptionOccur('-o', opt)
+    try:
+      o('arg')
+      self.fail('should check ShouldnotHaveValue')
+    except OptionShouldnotHaveValue:
+      pass
+    try:
+      o.arg
+      self.fail('should check ShouldnotHaveValue')
+    except OptionShouldnotHaveValue:
+      pass
+  def test_OptionWithoutValue__eq__(self):
+    '''if the option need no value, should disable __call__, __getattr__ 
+    and __eq__'''
+    from pyshin.error import OptionShouldnotHaveValue
+    class cmd(command):
+      o = Option('-o', action='store_true')
+    #print '54354345 cmd.options', cmd.options
+    o = ShortOptionOccur('o', cmd.options['o'])
+    try:
+      cmd-o=='arg'
+      self.fail('should check ShouldnotHaveValue')
+    except OptionShouldnotHaveValue:
+      pass
+    
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
           unittest.makeSuite(CommandCallChainTestCase),
+          unittest.makeSuite(OptionTestCase),
           DocTestSuite('pyshin.tests.test_cmdcall', 
-                     optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS),  
-         ))
+                     optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS)  
+        ))
   return suite
 
 if __name__ == '__main__':

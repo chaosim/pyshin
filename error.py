@@ -43,6 +43,9 @@ class TooFewArgumnet(PyshinError):
   ²ÎÊýÌ«ÉÙ'''
   pass
 
+class OptionShouldnotHaveValue(PyshinError):
+  '''option should not have value'''
+  
 class OptParseError (Exception):
     def __init__(self, msg):
         self.msg = msg
