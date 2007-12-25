@@ -97,7 +97,7 @@ class CommandClass(Element):
   def execute(self):
     '''any command instance should overload this method'''
 
-  def __call__(self):
+  def __call__(self, *arg, **kw):
     '''should produce an CommandCall,
     may be overloaded by actual command'''
     from call import CommandCall
@@ -107,6 +107,10 @@ class CommandClass(Element):
       setattr(cmdcall, attr, bind(value, cmdcall)) 
     for attr, value in self.dataAttributes.items():
       setattr(cmdcall, attr, deepcopy(value))
+    #print 'asdfdafadf, cmdcall.__dict__', cmdcall.__dict__
+    try: 
+      cmdcall.__dict__['call'](*arg, **kw)
+    except:pass
     return cmdcall
 
 # ------------------------------------------------------------------------------

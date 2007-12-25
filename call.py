@@ -143,6 +143,7 @@ class CommandCall(CommandCallBase):
   
   def saveAttributeArgument(self, attr):
     raise AttributeError, attr
+
 # ------------------------------------------------------------------------------
 # process Command Call Chain operator: >> << |
   def __rshift__(self, other):

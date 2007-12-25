@@ -52,6 +52,7 @@ class CommandTestCase(unittest.TestCase):
     self.assertEqual(result.action(), 'CmdA.action')
   
   def test__getattr_arg(self):
+    ''' open.readme.txt should set value to open'''
     class open(command):
       filename = ''
       def saveAttributeArgument(self, attr):
@@ -61,7 +62,16 @@ class CommandTestCase(unittest.TestCase):
         else: self.filename += '.' + attr
     result = open.readme.txt
     self.assertEqual(result.filename, 'readme.txt')  
-   
+  def test__call__arg(self):
+    '''open(readme.txt) should set value to open'''
+    class open(command):
+      filename = ''
+      def call(self, filename):
+         #print self, filename
+         self.filename = filename
+    result = open('readme.txt')
+    self.assertEqual(result.filename, 'readme.txt')      
+     
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandTestCase),
          ))

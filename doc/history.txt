@@ -1,6 +1,17 @@
-
+2007-12-25 13:50
+  use << and >>, instead of < and > as pipeline operator
+  CommandCall knows the execution state of itself.
+  to execute the commands by direction of the pipeline.
+  process option:
+    -o==arg, --opt==arg, -o.arg, --opt,arg, but no o(arg) or opt(arg)
+    --o/-option syntax error
+    store value of the option
+  process cmd.arg, cmd(*arg, **arg)  
+  operation on command: all produce CommandCall
+    __sub__, __call__, __getattr__ 
+  
 2007-12-20 21:01
-   CommandClass:
+  CommandClass:
     "class SomeCommand(Command)" produces an instance of CommandClass
     CommandClass.__call__ produces CommandCall
     options should be in options of  the command

@@ -461,11 +461,13 @@ class OptionOccur(object):
     self.option = option
     
   def __call__(self, value):
-    '''-o(arg)'''
-    if self.option.needValue():
-      self.value = value
-    else: raise OptionShouldnotHaveValue
-    return self
+    '''should not give value to option like -o(arg), (*arg, **kw) only reserved for command'''
+    from pyshin.error import PyshinSyntaxError
+    raise PyshinSyntaxError
+##    if self.option.needValue():
+##      self.value = value
+##    else: raise OptionShouldnotHaveValue
+##    return self
   def __neg__(self):
     '''for long option --opt'''
   
@@ -504,7 +506,3 @@ class LongOptionOccur(OptionOccur):
     else:
       from pyshin.error import PyshinSyntaxError
       raise PyshinSyntaxError, self
-
-
- 
-    

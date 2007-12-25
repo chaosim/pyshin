@@ -129,8 +129,9 @@ class CommandCallTestCase(unittest.TestCase):
 
     v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
-    result = cmd -v('given_value_in__call__')
-    self.assertEqual(result.v, 'given_value_in__call__')  
+##    new>>> should not do this:
+##    result = cmd -v('given_value_in__call__')
+##    self.assertEqual(result.v, 'given_value_in__call__')  
 
     v = OptionOccur('v')
     cmd = CommandCall(TestCommand)
@@ -214,11 +215,11 @@ class OptionTestCase(unittest.TestCase):
     #print opt.dest
     #opt.dest = None
     o = OptionOccur('-o', opt)
-    try:
-      o('arg')
-      self.fail('should check ShouldnotHaveValue')
-    except OptionShouldnotHaveValue:
-      pass
+##    try:
+##      o('arg') # new>>> should not do this.
+##      self.fail('should check ShouldnotHaveValue')
+##    except OptionShouldnotHaveValue:
+##      pass
     try:
       o.arg
       self.fail('should check ShouldnotHaveValue')
@@ -237,7 +238,11 @@ class OptionTestCase(unittest.TestCase):
       self.fail('should check ShouldnotHaveValue')
     except OptionShouldnotHaveValue:
       pass
-    
+  def test_NoValueFrom__call__(self):
+    '''option should not take value frome __call__  '''
+    from pyshin.error import PyshinSyntaxError
+    o = ShortOptionOccur('o')
+    self.assertRaises(PyshinSyntaxError, o.__call__, None)
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
           unittest.makeSuite(CommandCallChainTestCase),
