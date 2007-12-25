@@ -94,6 +94,7 @@ class CommandClass(Element):
     except: 
       cmdcall = self()
       return getattr(cmdcall, attr)      
+  
   def execute(self):
     '''any command instance should overload this method'''
 
@@ -112,34 +113,45 @@ class CommandClass(Element):
       cmdcall.__dict__['call'](*arg, **kw)
     except:pass
     return cmdcall
+  
+  def __mod__(self, arg):
+    cmdcall = self()
+    cmdcall.arguments.append(arg)
+    return cmdcall
+  
+  def __eq__(self, other):
+    return self.__name__==other.__name__
 
 # ------------------------------------------------------------------------------
 # process Command Call Chain operator: > < |
   def __rshift__(self, other):
     '''cmda >> cmdb
     produce CommandCallChain to implement pipeline'''
-    from call import CommandCallChain
-    selfcall = self()
-    othercall = other()
-    othercall.input = selfcall#.output
-    return CommandCallChain([selfcall, othercall])
-  def __or__(self, other):
-    '''cmda | cmdb
-    produce CommandCallChain to implement pipeline'''
-  __or__ = __rshift__
+    if isinstance(other, CommandClass): 
+      othercall = other()
+    return self()>>othercall
+##  def __or__(self, other):
+##    '''cmda | cmdb
+##    produce CommandCallChain to implement pipeline'''
+##  __or__ = __rshift__
 
   def __lshift__(self, other):
     '''cmda < cmdb
     produce CommandCallChain to implement pipeline'''
-    from call import CommandCallChain
-    selfcall = self()
-    othercall = other()
-    selfcall.input = othercall#.output
-    return CommandCallChain([selfcall, othercall])
+    if isinstance(other, CommandClass): 
+      othercall = other()
+    return self()<<othercall
   def __sub__(self, other):
     '''cmd -o'''
     selfcall = self()
     return selfcall-other
+  def __gt__(self, other):
+    '''cmd >run to execute self'''
+    from pyshin.error import InvalidCommand
+    from pyshin.call import run
+    if other is not run:
+      raise InvalidCommand
+    return run(self)
   
   def __repr__(self):
     return self.__name__

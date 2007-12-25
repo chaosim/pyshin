@@ -8,3 +8,19 @@ This is better. pipeline implies shift. - -- == << >> |
 
 2007-12-24 18:01
 The CommandClass can be used to refactoring optparse more elegantly.
+
+2007-12-25 15:10
+limitations:
+  use ==: the precedence of "cmda -a==b -c==d  -e" is wrong.
+    # must use //
+  # the argument should follow the command or follow the option without ==value after it.
+    
+  the option should not follow the option with ==value it directly.
+  
+  cmda >> cmdb >> cmdc -run can only execute cmdc because of the precedence.
+    # so use "cmda >> cmdb >> cmdc >run".
+  
+  !!! How about changing the precedence of the operator by whitespace?
+  It's necessary using % for the argument of the command and using to avoid ambiguity.
+  
+  How about cmd (-o==option)?

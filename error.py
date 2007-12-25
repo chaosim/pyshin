@@ -2,8 +2,8 @@ class PyshinError(Exception):
   pass
 
 class InvalidCommand(PyshinError):
-  pass
-  
+  ''' invalid command'''
+ 
 class InvalidOption(PyshinError):
   pass
   
@@ -43,21 +43,19 @@ class TooFewArgumnet(PyshinError):
   ²ÎÊýÌ«ÉÙ'''
   pass
 
+class LoopInCommandCallChain(PyshinError):
+  '''Find loop in CommandCallChain'''
+  
 class OptionShouldnotHaveValue(PyshinError):
   '''option should not have value'''
-  
+
 class OptParseError (Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
-
+  def __init__(self, msg): self.msg = msg
+  def __str__(self): return self.msg
 
 class OptionError (OptParseError):
-    """
-    Raised if an Option instance is created with invalid or
-    inconsistent arguments.
+    """ Raised if an Option instance is created 
+    with invalid or inconsistent arguments.
     """
 
     def __init__(self, msg, option):
@@ -67,23 +65,15 @@ class OptionError (OptParseError):
     def __str__(self):
         if self.option_id:
             return "option %s: %s" % (self.option_id, self.msg)
-        else:
-            return self.msg
+        else: return self.msg
 
 class OptionConflictError (OptionError):
-    """
-    Raised if conflicting options are added to an OptionParser.
-    """
+    """Raised if conflicting options are added to an OptionParser."""
 
 class OptionValueError (OptParseError):
-    """
-    Raised if an invalid option value is encountered on the command
-    line.
-    """
+    """ Raised if an invalid option value is encountered on the command line. """
 
 class BadOptionError (OptParseError):
-    """
-    Raised if an invalid or ambiguous option is seen on the command-line.
-    """
+    """Raised if an invalid or ambiguous option is seen on the command-line."""
 
 

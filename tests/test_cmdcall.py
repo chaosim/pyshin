@@ -24,13 +24,14 @@ class CommandCallTestCase(unittest.TestCase):
     self.assertRaises(exceptions.TypeError, repr, cmda) #???
   
   def test_pipeline_operator(self):
-    '''Pipeline operators | > < should produce CommandCallChain'''
+    '''Pipeline operators >> << should produce CommandCallChain'''
     # a | b
     cmda = CommandCall('a')
     cmdb = CommandCall('b')                
-    result = cmda | cmdb
-    self.assert_(isinstance(result, CommandCallChain))
-    self.assert_((result[0] is cmda) and (result[1] is cmdb))
+##    result = cmda | cmdb
+##    self.assert_(isinstance(result, CommandCallChain))
+##    self.assert_((result[0] is cmda) and (result[1] is cmdb))
+##    self.assertRaises(exceptions.AttributeError, cmda.__or__, cmdb)
     # a >> b 
     result =cmda >> cmdb
     self.assert_(isinstance(result, CommandCallChain))
@@ -41,8 +42,8 @@ class CommandCallTestCase(unittest.TestCase):
     self.assert_((result[0] is cmda) and (result[1] is cmdb))
     
   def test_forward_pipeline(self):
-    '''The output of the previous call become the input of the next call
-    前一个命令的输入成为后一个命令的输入'''
+    '''the previous call become the input of the next call
+    前一个命令成为后一个命令的输入'''
     cmda = CommandCall('a')
     cmdb = CommandCall('b')                
     chain = cmda >> cmdb
@@ -127,16 +128,16 @@ class CommandCallTestCase(unittest.TestCase):
     result = cmd -c
     self.assertEqual(result.const_of_c, 'const_in_c_option_of_TestCommand')  
 
-    v = OptionOccur('v', TestCommand.options['v'])
-    cmd = CommandCall(TestCommand)
+##    v = OptionOccur('v', TestCommand.options['v'])
+##    cmd = CommandCall(TestCommand)
 ##    new>>> should not do this:
 ##    result = cmd -v('given_value_in__call__')
 ##    self.assertEqual(result.v, 'given_value_in__call__')  
 
-    v = OptionOccur('v')
+    v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
-    result = cmd -v=='given_value_in__call__'
-    self.assertEqual(result.v, 'given_value_in__call__')  
+    result = cmd -v//'given_value by //'
+    self.assertEqual(result.v, 'given_value by //')  
 
     v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
@@ -186,7 +187,7 @@ class CommandCallChainTestCase(unittest.TestCase):
     >>> chain.execute()
     command1 command2
     '''
-  def wait_test_executeCommandCallAccordingToDirection(self):
+  def test_executeCommandCallAccordingToDirection(self):
     '''Execute commands according the direction of the pipeline
     >>> from pyshin.tests.commands import command1, command2, command3
     >>> cmd1 = command1()
@@ -204,7 +205,72 @@ class CommandCallChainTestCase(unittest.TestCase):
     >>> chain.execute()
     command2 command1 command3
     '''
+  def test_runCommand(self):
+    '''run(cmd), run(call) or run(chain) execute themself
+    >>> class cmd1(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    >>> class cmd2(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    >>> class cmd3(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    
+    >>> from pyshin.call import run
+    >>> run(cmd1)
+    cmd1
+    >>> cmdcall = cmd1()
+    >>> run(cmdcall)
+    cmd1
+    >>> chain = cmd1>>cmd2<<cmd3
+    >>> run(chain)
+    cmd1 cmd3 cmd2
+    '''
 
+  def test_runCommand(self):
+    '''cmd >run, cmdcall >run or cmd1 >> cmd2 << cmd3 >run execute themself
+    >>> class cmd1(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    >>> class cmd2(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    >>> class cmd3(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    
+    >>> from pyshin.call import run
+    >>> cmd1 >run
+    cmd1
+    >>> cmdcall = cmd1()
+    >>> cmdcall >run
+    cmd1
+    >>> cmd1>>cmd2<<cmd3 >run
+    cmd1 cmd3 cmd2
+    >>> cmd1>>cmd2<<cmd3 >run
+    cmd1 cmd3 cmd2
+    '''
+
+  def test_runCommand(self):
+    '''Finding loop in call chain should raise error'''
+    from pyshin.error import LoopInCommandCallChain
+    class cmd1(command):
+      def action(self):
+        print self.command.__name__,
+    class cmd2(command):
+      def action(self):
+        print self.command.__name__,
+    class cmd3(command):
+      def action(self):
+        print self.command.__name__,
+    #cmd1 >> cmd2 >> cmd3
+    try: 
+      cmd1 >> cmd1
+    except LoopInCommandCallChain:
+      pass
+      
+    
 class OptionTestCase(unittest.TestCase):
   '''test usage of option'''        
   def test_OptionWithoutValue(self):
@@ -225,24 +291,25 @@ class OptionTestCase(unittest.TestCase):
       self.fail('should check ShouldnotHaveValue')
     except OptionShouldnotHaveValue:
       pass
-  def test_OptionWithoutValue__eq__(self):
+  def test_OptionShoulntUse__eq__(self):
     '''if the option need no value, should disable __call__, __getattr__ 
     and __eq__'''
-    from pyshin.error import OptionShouldnotHaveValue
-    class cmd(command):
-      o = Option('-o', action='store_true')
+    from pyshin.error import PyshinSyntaxError
+##    class cmd(command):
+##      o = Option('-o', action='store_true')
     #print '54354345 cmd.options', cmd.options
-    o = ShortOptionOccur('o', cmd.options['o'])
+    o = ShortOptionOccur('o')#, cmd.options['o']
     try:
-      cmd-o=='arg'
-      self.fail('should check ShouldnotHaveValue')
-    except OptionShouldnotHaveValue:
+      o=='arg'
+      self.fail('should check not to use ==')
+    except PyshinSyntaxError:
       pass
   def test_NoValueFrom__call__(self):
     '''option should not take value frome __call__  '''
     from pyshin.error import PyshinSyntaxError
     o = ShortOptionOccur('o')
     self.assertRaises(PyshinSyntaxError, o.__call__, None)
+
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
           unittest.makeSuite(CommandCallChainTestCase),

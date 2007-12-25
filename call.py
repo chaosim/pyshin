@@ -46,6 +46,7 @@ class CommandCall(CommandCallBase):
     self.input = None
     self.whoWaitValue = None # the dest of the current option which is absense of value
     self.options = []
+    self.arguments = [] # arguments of the CommandCall
 
 # --------------------------------------------------------------------
 # provide option and arguments by operator:
@@ -110,7 +111,11 @@ class CommandCall(CommandCallBase):
 ##        raise RuntimeError, "unknown action %r" % self.action
 
     return self
-  
+
+  def __mod__(self, arg):
+    self.arguments.append(arg)
+    return self
+
 # pause implementing this feature.
   def xxx__div__(self, other):
     '''DOS/Windows style option dir/h/w'''
@@ -120,12 +125,14 @@ class CommandCall(CommandCallBase):
     validity of the value to the option should be checked.
     >>> cmd --opt==asdf
     '''
-    from pyshin.error import OptionShouldnotHaveValue
-    if self.whoWaitValue:
-      setattr(self, self.whoWaitValue, other)
-      self.whoWaitValue = None
-      return self
-    else: raise OptionShouldnotHaveValue
+    return isinstance(other, CommandCall) and self.command==other.command
+##    from pyshin.error import PyshinSyntaxError
+##    raise PyshinSyntaxError
+##    if self.whoWaitValue:
+##      setattr(self, self.whoWaitValue, other)
+##      self.whoWaitValue = None
+##      return self
+##    else: raise OptionShouldnotHaveValue
   
   def __call__(self, *arg, **kw):
     '''one or more actual arguments should be added.'''  
@@ -150,20 +157,34 @@ class CommandCall(CommandCallBase):
     '''cmda >> cmdb
     produce CommandCallChain to implement pipeline'''
     other.input = self#.output
-    return CommandCallChain([self, other])
-  def __or__(self, other):
-    '''cmda | cmdb
-    produce CommandCallChain to implement pipeline'''
-  __or__ = __rshift__
+    chain = CommandCallChain([self, other])
+    chain.loop = [self, other]
+    chain.loopDirection = '>>'
+    return chain
+##  def __or__(self, other):
+##    '''cmda | cmdb
+##    produce CommandCallChain to implement pipeline'''
+##  __or__ = __rshift__
 
   def __lshift__(self, other):
     '''cmda << cmdb
     produce CommandCallChain to implement pipeline'''
     self.input = other#.output
-    return CommandCallChain([self, other])
+    chain = CommandCallChain([self, other])
+    chain.loop = [self, other]
+    chain.loopDirection = '<<'
+    return chain
 
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
+  def __gt__(self, other):
+    '''cmd >run to execute self'''
+    from pyshin.error import InvalidCommand
+    from pyshin.call import run
+    if other is not run:
+      raise InvalidCommand
+    return run(self)
+
   def execute(self):
     if not self.executed:
       if self.input is not None:
@@ -195,19 +216,37 @@ class CommandCallChain(CommandCallBase):
     '''cmd1 >> cmd2: pipeline operator'''
     if isinstance(other, CommandClass):
       other = other()
-    other.input = self.calls[-1]#.output
+    lastcall = self.calls[-1]
+    if self.loopDirection=='>>':
+      if other in self.loop: 
+        raise LoopInCommandCallChain
+      self.loop.append(other)
+    else: 
+      self.loop = [lastcall, other]
+      self.loopDirection = '>>'
+   
+    other.input = lastcall#.output
     self.calls.append(other)
     return self
   
-  def __or__(self, other):
-    '''cmd1 | cmd2: pipeline operator'''
-  __or__ = __rshift__
+##  def __or__(self, other):
+##    '''cmd1 | cmd2: pipeline operator'''
+##  __or__ = __rshift__
 
   def __lshift__(self, other):
     '''cmd1 << cmd2: pipeline operator'''
     if isinstance(other, CommandClass):
       other = other()
-    self.calls[-1].input = other#.output
+    lastcall = self.calls[-1]
+    if self.loopDirection=='<<':
+      if other in self.loop: 
+        raise LoopInCommandCallChain
+      self.loop.append(other)
+    else: 
+      self.loop = [lastcall, other]
+      self.loopDirection = '<<'
+   
+    lastcall.input = other#.output
     self.calls.append(other)
     
     return self
@@ -224,6 +263,14 @@ class CommandCallChain(CommandCallBase):
     #self.executed = True
     #self.result = self.calls[-1].result
 
+  def __gt__(self, other):
+    '''cmd >run to execute self'''
+    from pyshin.error import InvalidCommand
+    from pyshin.call import run
+    if other is not run:
+      raise InvalidCommand
+    return run(self)
+
   def __repr__(self):
     '''all the CommandCall in the chain should be executed with their option and 
     arguments and return the repr of the last result'''
@@ -233,3 +280,13 @@ class CommandCallChain(CommandCallBase):
     '''all the CommandCall in the chain should be executed with their option 
     and arguments and return the str of the last result.'''
   __str__ = __repr__
+
+class _run:
+  def __call__(self, cmd):
+    if isinstance(cmd, CommandClass):
+      cmd = cmd()
+      cmd.execute()
+    else:
+      cmd.execute()
+    #return cmd
+run = _run()

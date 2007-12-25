@@ -70,7 +70,15 @@ class CommandTestCase(unittest.TestCase):
          #print self, filename
          self.filename = filename
     result = open('readme.txt')
-    self.assertEqual(result.filename, 'readme.txt')      
+    self.assertEqual(result.filename, 'readme.txt')   
+    
+  def test_CommandArg__mod__(self):
+    class cmd1(command):
+      pass
+    result = cmd1 %'readme.txt'
+    self.assertEqual(result.arguments, ['readme.txt'])   
+    result = cmd1 %'readme.txt' %'asdfdfas'
+    self.assertEqual(result.arguments, ['readme.txt', 'asdfdfas'])   
      
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandTestCase),

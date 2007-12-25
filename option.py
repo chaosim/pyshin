@@ -471,6 +471,18 @@ class OptionOccur(object):
   def __neg__(self):
     '''for long option --opt'''
   
+  def __eq__(self, other):
+    '''should not use ==, use // instead '''
+    from pyshin.error import PyshinSyntaxError
+    raise PyshinSyntaxError
+  
+  def __floordiv__(self, other):
+    '''should not use ==, use // instead '''
+    if self.option.needValue():
+      self.value = other
+    else: raise OptionShouldnotHaveValue
+    return self
+  
   def __getattr__(self, attr):
     if attr=='value': 
       return self.__dict__[attr]
