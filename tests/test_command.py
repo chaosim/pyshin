@@ -1,13 +1,11 @@
 import unittest
+import exceptions
 
 from zope.testing.doctestunit import DocTestSuite, DocFileSuite
 from zope.testing import doctest
 
-import exceptions
-
-from pyshin.command import command
-from pyshin.option import Option#, OptionInstance
-#from pyshin.base import fromFunction
+from pyshin.command import command, CommandClass
+from pyshin.option import Option
 from pyshin.call import CommandCall
 
 class CmdA(command):
@@ -21,10 +19,10 @@ class CommandTestCase(unittest.TestCase):
   def setUp(self):
     pass
       
-  def xxxtest_CommandClassDefine(self):
+  def test_CommandClassDefine(self):
     ''' class X(command) should produce an instance of CommandClass'''
-    #self.assertEqual(CmdA.__name__, 'CmdA')
-    #self.assertEqual(CmdA.__class__, CommandClass)
+    self.assertEqual(CmdA.__name__, 'CmdA')
+    self.assertEqual(CmdA.__class__, CommandClass)
 
   def test_OptionInCommand(self):
     '''options should be in options of  the command'''
@@ -56,7 +54,6 @@ class CommandTestCase(unittest.TestCase):
     class open(command):
       filename = ''
       def saveAttributeArgument(self, attr):
-        #print '54524352353, self.filename', self.filename
         if self.filename=='':
           self.filename += attr
         else: self.filename += '.' + attr
@@ -67,12 +64,11 @@ class CommandTestCase(unittest.TestCase):
     class open(command):
       filename = ''
       def call(self, filename):
-         #print self, filename
          self.filename = filename
     result = open('readme.txt')
     self.assertEqual(result.filename, 'readme.txt')   
     
-  def test_CommandArg__mod__(self):
+  def test_CommandArgumentBy__mod__(self):
     class cmd1(command):
       pass
     result = cmd1 %'readme.txt'

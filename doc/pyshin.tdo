@@ -3,10 +3,14 @@ done 2007-12-18 14:22 2007-12-20 14:24 class SomeCommand(Command) produces an in
   # 2007-12-22 21:45 refactor to make SomeCommand a true class.
   done 2007-12-24 21:17 end:2007-12-24 21:58 "open.readme.txt" should be permitted.
   done 2007-12-25 12:57 end:2007-12-25 13:33 open('readme.txt') should set value to open call
-  new done 2007-12-25 15:52 open %file1 %file2 should add arguments to open.
+  done 2007-12-25 15:52 open %file1 %file2 should add arguments to open.
+  todo 2007-12-25 21:32 open %file -o/'optionvalue' %file
   
 done end:2007-12-20 20:47 process CommandCall
+  done 2007-12-23 14:38 end:2007-12-24 17:41 CommandCall should not pollute the instance of the command
+  
   done end:2007-12-20 20:50 Pipeline operators | >> << should produce CommandCallChain
+    # 2007-12-25 21:19 don't use |
   done end:2007-12-20 20:51 The output of the previous call should become the input of next call
   
   done end:2007-12-20 20:51 "cmd -o" should add the option o to cmd.options
@@ -18,16 +22,22 @@ done end:2007-12-20 20:47 process CommandCall
   done 2007-12-24 19:35 end:2007-12-24 21:11 if the option need no value, should disable __call__, __getattr__ and __eq__
   cancel 2007-12-25 15:20 cmd -o  (-o==arg) (-o==arg) should append options. 
     # precedence of == is not appropiate
+    # do not use ==/
+  done 2007-12-21 21:25 end:2007-12-24 17:40 refactor Option class for not repeating option name
    
   done 2007-12-20 21:23 end:2007-12-21 21:02 Meeting with options should store value in the commandcall
     done end:2007-12-21 12:23 store_true and store_false with or without destination given should take action.
     done 2007-12-21 12:45 end:2007-12-21 12:50 store_const should store a const value given in the option of the command
     done end:2007-12-21 13:24 action 'store' should store the value get from __call__, just like cmd --option(value) XXX
       done 2007-12-25 12:59 end:2007-12-25 13:49 option should not take value frome __call__, only from __eq__ or __getattr__
-        # 2007-12-25 15:24 perhaps I have to open the option(value) syntax for the limitation of cmd -o -o==arg -o==arg -o                  
-    done 2007-12-21 13:26 end:2007-12-21 13:36 Value can be given by ==, just like "cmd --option==value"
+        # 2007-12-25 15:24 perhaps I have to open the option(value) syntax for the limitation of cmd -o -o==arg -o==arg -o
+          # use / instead, don't use (), ==                 
+    done 2007-12-21 13:26 end:2007-12-21 13:36 Value can be given by == XXX, just like "cmd --option==value"
       # 2007-12-25 15:43 should not either use __call__ or ==, use // instead.
-      new done 2007-12-25 16:19 end:2007-12-25 17:05 Value can be given by // just like "cmd --option/value"
+        # 2007-12-25 21:34 use / instead of //
+      done 2007-12-25 16:19 end:2007-12-25 17:05 Value can be given by // just like "cmd --option/value"
+        new done 2007-12-25 21:34 end:2007-12-26 12:15 use / instead of //
+      new 2007-12-25 21:30 end:2007-12-26 12:57 value can ge given only once.
     done 2007-12-21 13:39 end:2007-12-21 14:19 some option can be given values like "cmd --option.value.value.value"
   
   done 2007-12-23 14:11 The command call should have the state of itself.
@@ -40,13 +50,9 @@ done 2007-12-21 22:01 end:2007-12-24 17:40 process CommandCallChain
       # Maybe I should change it back again.
   done 2007-12-23 12:39 end:2007-12-24 13:14 Execute commands according the direction of the pipeline
     # Meet some bugs Causing by the difference between the comparision operator and other operator.
-  new done 2007-12-25 14:44 cmd1<<cmd2>>cmd3  >run execute the CommandCallChain
-  new done 2007-12-25 14:48 end:2007-12-25 15:06 run(cmd), run(call) or run(chain) execute themself.
-  new done 2007-12-25 15:05 end:2007-12-25 20:53 Finding loop in call chain should raise error.
-  
-done 2007-12-23 14:38 end:2007-12-24 17:41 CommandCall should not pollute the instance of the command
- 
-done 2007-12-21 21:25 end:2007-12-24 17:40 refactor Option class for not repeat option name
+  done 2007-12-25 14:44 cmd1<<cmd2>>cmd3  >run execute the CommandCallChain
+  done 2007-12-25 14:48 end:2007-12-25 15:06 run(cmd), run(call) or run(chain) execute themself.
+  done 2007-12-25 15:05 end:2007-12-25 20:53 Finding loop in call chain should raise error. 
 
 todo 2007-12-25 14:46 repr(cmd), repr(cmdcall), repr(callchain) execute the command
 

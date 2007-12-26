@@ -1,7 +1,5 @@
 import sys
-#from types import FunctionType
-#from error import InvalidCommand
-from base import Element#, fromFunction
+from base import Element
 
 from pyshin.option import Option
 
@@ -123,7 +121,7 @@ class CommandClass(Element):
     return self.__name__==other.__name__
 
 # ------------------------------------------------------------------------------
-# process Command Call Chain operator: > < |
+# process Command Call Chain operator: >> <<
   def __rshift__(self, other):
     '''cmda >> cmdb
     produce CommandCallChain to implement pipeline'''

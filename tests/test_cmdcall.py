@@ -25,7 +25,7 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_pipeline_operator(self):
     '''Pipeline operators >> << should produce CommandCallChain'''
-    # a | b
+    # a | b XXX
     cmda = CommandCall('a')
     cmdb = CommandCall('b')                
 ##    result = cmda | cmdb
@@ -136,8 +136,10 @@ class CommandCallTestCase(unittest.TestCase):
 
     v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
-    result = cmd -v//'given_value by //'
-    self.assertEqual(result.v, 'given_value by //')  
+    result = cmd -v/'given_value by /'
+    self.assertEqual(result.v, 'given_value by /')  
+
+    #result = cmd %'file.txt' -o/'optionvalue' %file2.txt
 
     v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
@@ -274,42 +276,43 @@ class CommandCallChainTestCase(unittest.TestCase):
 class OptionTestCase(unittest.TestCase):
   '''test usage of option'''        
   def test_OptionWithoutValue(self):
-    '''if the option need no value, should disable __call__, __getattr__ 
-    and __eq__'''
+    '''if the option need no value, should disable __div__, __getattr__'''
     from pyshin.error import OptionShouldnotHaveValue
     opt = Option('-o', action='store_true')
-    #print opt.dest
-    #opt.dest = None
     o = OptionOccur('-o', opt)
-##    try:
-##      o('arg') # new>>> should not do this.
-##      self.fail('should check ShouldnotHaveValue')
-##    except OptionShouldnotHaveValue:
-##      pass
     try:
       o.arg
       self.fail('should check ShouldnotHaveValue')
     except OptionShouldnotHaveValue:
       pass
-  def test_OptionShoulntUse__eq__(self):
-    '''if the option need no value, should disable __call__, __getattr__ 
-    and __eq__'''
-    from pyshin.error import PyshinSyntaxError
-##    class cmd(command):
-##      o = Option('-o', action='store_true')
-    #print '54354345 cmd.options', cmd.options
-    o = ShortOptionOccur('o')#, cmd.options['o']
+    
+    class cmd(command):
+      o = Option('-o', action='store_true')
+    o = ShortOptionOccur('o', cmd.options['o'])
     try:
-      o=='arg'
-      self.fail('should check not to use ==')
-    except PyshinSyntaxError:
+      o/'arg'
+      self.fail('should not provide value for the option which need not value')
+    except OptionShouldnotHaveValue:
       pass
-  def test_NoValueFrom__call__(self):
-    '''option should not take value frome __call__  '''
+    
+  def test_WrongOperatorForOption(self):
+    '''option should not take value from -o(value) -o==value  '''
     from pyshin.error import PyshinSyntaxError
     o = ShortOptionOccur('o')
     self.assertRaises(PyshinSyntaxError, o.__call__, None)
-
+    self.assertRaises(PyshinSyntaxError, o.__eq__, None)
+  
+  def test_ProvideValueOnlyOnc3(self):
+    '''value can ge given only once'''
+    from pyshin.error import OptionWithTooManySlash
+    opt = Option('-o', action='store')
+    o = OptionOccur('-o', opt)
+    try:
+      o/'arg'/'arg'
+      self.fail('should check providing value with / only once')
+    except OptionWithTooManySlash:
+      pass
+    
 def test_suite():
   suite = unittest.TestSuite((unittest.makeSuite(CommandCallTestCase),
           unittest.makeSuite(CommandCallChainTestCase),

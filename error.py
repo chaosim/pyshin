@@ -49,6 +49,9 @@ class LoopInCommandCallChain(PyshinError):
 class OptionShouldnotHaveValue(PyshinError):
   '''option should not have value'''
 
+class OptionWithTooManySlash(PyshinError):
+  '''option should be provided value with / only once'''
+
 class OptParseError (Exception):
   def __init__(self, msg): self.msg = msg
   def __str__(self): return self.msg

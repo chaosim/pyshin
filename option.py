@@ -461,7 +461,9 @@ class OptionOccur(object):
     self.option = option
     
   def __call__(self, value):
-    '''should not give value to option like -o(arg), (*arg, **kw) only reserved for command'''
+    '''should not give value to option like -o(arg), (*arg, **kw) only 
+    reserved for command
+    '''
     from pyshin.error import PyshinSyntaxError
     raise PyshinSyntaxError
 ##    if self.option.needValue():
@@ -476,10 +478,15 @@ class OptionOccur(object):
     from pyshin.error import PyshinSyntaxError
     raise PyshinSyntaxError
   
-  def __floordiv__(self, other):
-    '''should not use ==, use // instead '''
+  def __div__(self, other):
+    '''use / to provide value for the option '''
+    from pyshin.error import OptionWithTooManySlash
     if self.option.needValue():
-      self.value = other
+      #print 253452535, other, self.__dict__
+      if 'value' in self.__dict__: 
+        raise OptionWithTooManySlash
+      else:
+        self.value = other
     else: raise OptionShouldnotHaveValue
     return self
   
@@ -503,6 +510,7 @@ class OptionOccur(object):
 
 class ShortOptionOccur(OptionOccur):
   def __neg__(self):
+    '''prevent --o'''
     from pyshin.error import ShouldBeShortOption
     raise ShouldBeShortOption, self
     
@@ -512,6 +520,7 @@ class LongOptionOccur(OptionOccur):
     self.havePrecededMinus = False
     
   def __neg__(self):
+    '''used for second minus in --opt'''
     if not self.havePrecededMinus:
       self.havePrecededMinus = True
       return self

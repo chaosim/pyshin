@@ -1,14 +1,20 @@
+2007-12-26 13:09
+  | is not used as pipeline operator
+  / used for providing value to option.
+  cmd %arg1 %arg2
+  cmd1<<cmd2>>cmd3  >run execute the CommandCallChain
+  
 2007-12-25 13:50
   use << and >>, instead of < and > as pipeline operator
   CommandCall knows the execution state of itself.
   to execute the commands by direction of the pipeline.
   process option:
     -o==arg, --opt==arg, -o.arg, --opt,arg, but no o(arg) or opt(arg)
-    --o/-option syntax error
+    --o/-option long/short syntax error
     store value of the option
   process cmd.arg, cmd(*arg, **arg)  
-  operation on command: all produce CommandCall
-    __sub__, __call__, __getattr__ 
+  operation on command  produce CommandCall
+    __sub__, __call__, __getattr__, __mod__, __div,  
   
 2007-12-20 21:01
   CommandClass:
