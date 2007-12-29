@@ -1,7 +1,7 @@
 '''process calls on the commands, produce pipelines, execute the command with 
 options and arguments provided'''
 
-from option import Option#, OptionContainer
+from option import Option
 from error import RepeatOptionError, InvalidOption
 from command import CommandClass
 
@@ -50,7 +50,7 @@ class CommandCall(CommandCallBase):
 
 # --------------------------------------------------------------------
 # provide option and arguments by operator:
-#  -o --option -o(arg) -o==adsfdsf --option==asdfas 
+#  -o --option -o/arg -o/adsfdsf --option/asdfas 
 # (option=value) (argvalue)
 # cmd.some.value open.readme.txt
 # cmd.option.afddsf
@@ -64,7 +64,6 @@ class CommandCall(CommandCallBase):
      '''
     
     if other.name not in self.command.options:
-      #print '8760988, other.name', other.name, 'self.command.options', self.command.options
       raise InvalidOption
     if other in self.options:
       raise RepeatOptionError
@@ -73,6 +72,11 @@ class CommandCall(CommandCallBase):
     if isinstance(other, LongOptionOccur) and not other.havePrecededMinus:
       raise PyshinSyntaxError, 'should have two minus before long option'
     self.options.append(other)
+   
+    # get the arguments after the option
+    if 'argForCmdCall' in other.__dict__:
+      self.arguments += other.__dict__['argForCmdCall']
+    
     cmdoption = self.command.options[other.name]
     action = cmdoption.action
     if action=='store_true':
@@ -126,13 +130,6 @@ class CommandCall(CommandCallBase):
     >>> cmd --opt==asdf
     '''
     return isinstance(other, CommandCall) and self.command==other.command
-##    from pyshin.error import PyshinSyntaxError
-##    raise PyshinSyntaxError
-##    if self.whoWaitValue:
-##      setattr(self, self.whoWaitValue, other)
-##      self.whoWaitValue = None
-##      return self
-##    else: raise OptionShouldnotHaveValue
   
   def __call__(self, *arg, **kw):
     '''one or more actual arguments should be added.'''  
@@ -143,7 +140,6 @@ class CommandCall(CommandCallBase):
       return self.__class__.__dict__[attr]
     elif attr in self.__dict__:
       return self.__dict__[attr]
-    #elif attr in self.
     else: 
       self.saveAttributeArgument(attr)
       return self
@@ -156,15 +152,11 @@ class CommandCall(CommandCallBase):
   def __rshift__(self, other):
     '''cmda >> cmdb
     produce CommandCallChain to implement pipeline'''
-    other.input = self#.output
+    other.input = self
     chain = CommandCallChain([self, other])
     chain.loop = [self, other]
     chain.loopDirection = '>>'
     return chain
-##  def __or__(self, other):
-##    '''cmda | cmdb
-##    produce CommandCallChain to implement pipeline'''
-##  __or__ = __rshift__
 
   def __lshift__(self, other):
     '''cmda << cmdb
@@ -191,14 +183,7 @@ class CommandCall(CommandCallBase):
         self.input.execute()
       self.action()
       self.executed = True
-  
-##  def copy(self):
-##    cmdcall = self.command()
-##    cmdcall.executed = self.executed
-##    cmdcall.options = copy(self.options)
-##    cmdcall.input = copy(self.input)
-##    cmdcall.output = copy(self.output)
-          
+           
 class CommandCallChain(CommandCallBase):
   '''Calls chain of commands.'''
   def __init__(self, calls=None):
@@ -214,6 +199,7 @@ class CommandCallChain(CommandCallBase):
   
   def __rshift__(self, other):
     '''cmd1 >> cmd2: pipeline operator'''
+    from pyshin.error import LoopInCommandCallChain
     if isinstance(other, CommandClass):
       other = other()
     lastcall = self.calls[-1]
@@ -225,16 +211,13 @@ class CommandCallChain(CommandCallBase):
       self.loop = [lastcall, other]
       self.loopDirection = '>>'
    
-    other.input = lastcall#.output
+    other.input = lastcall
     self.calls.append(other)
     return self
   
-##  def __or__(self, other):
-##    '''cmd1 | cmd2: pipeline operator'''
-##  __or__ = __rshift__
-
   def __lshift__(self, other):
     '''cmd1 << cmd2: pipeline operator'''
+    from pyshin.error import LoopInCommandCallChain
     if isinstance(other, CommandClass):
       other = other()
     lastcall = self.calls[-1]
@@ -246,7 +229,7 @@ class CommandCallChain(CommandCallBase):
       self.loop = [lastcall, other]
       self.loopDirection = '<<'
    
-    lastcall.input = other#.output
+    lastcall.input = other
     self.calls.append(other)
     
     return self
@@ -255,13 +238,8 @@ class CommandCallChain(CommandCallBase):
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def execute(self):
-    #print self.calls
-    for call in self.calls:#[:-1]
-      #print call
+    for call in self.calls:
       call.execute()
-    #self.calls[-1].execute() 
-    #self.executed = True
-    #self.result = self.calls[-1].result
 
   def __gt__(self, other):
     '''cmd >run to execute self'''

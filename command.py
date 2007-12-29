@@ -4,9 +4,6 @@ from base import Element
 from pyshin.option import Option
 
 class CommandClass(Element):
-# should I make all commands have the same class Command?
-# just like all the interfaces have the class  InterfaceClass in zope?
-# 2007-12-20 12:07 Have had a try before, but I have delete it now.
   '''Prototype (scarecrow) Commands Implementation
   these codes is stolen form zope.interface.interface.py
 
@@ -56,12 +53,11 @@ class CommandClass(Element):
 
   def _processAttributes(self, dest=None):
     '''add options, method and data attributes in the command to the call'''    
-    from types import FunctionType #UnboundMethodType, 
+    from types import FunctionType 
     if dest is None: dest = self
     for cmd in self.bases:
       cmd._processAttributes(dest)
     for attr, value in self.attrs.items():
-      #print attr, value
       if isinstance(value, Option):
         dest.options[attr]=value
       elif type(value)==FunctionType:
@@ -128,10 +124,6 @@ class CommandClass(Element):
     if isinstance(other, CommandClass): 
       othercall = other()
     return self()>>othercall
-##  def __or__(self, other):
-##    '''cmda | cmdb
-##    produce CommandCallChain to implement pipeline'''
-##  __or__ = __rshift__
 
   def __lshift__(self, other):
     '''cmda < cmdb
@@ -163,4 +155,65 @@ def rebind(method, obj):
 def bind(func, obj):
   import new
   return new.instancemethod(func, obj, obj.__class__)
+
+class Registry:
+  def __init__(self, globl=None):
+    if globl is None:
+      self.globl = {}
+    else: self.globl = globl
   
+  def addOption(self, option):
+    from pyshin.option import OptionOccur
+    shortOpt = [opt[1:] for opt in option._short_opts]
+    longOpt = [opt[2:] for opt in option._long_opts]
+    for opt in shortOpt+longOpt:
+      #print opt     
+      self.globl[opt] = OptionOccur(opt, option)
+  def addCommand(self, cmd):
+    for name, opt in cmd.options.items():
+      self.addOption(opt)  
+
+import sys
+import __builtin__
+
+class importer:
+  '''produce variable in globals() for all options when import command'''
+  def __init__(self, globals):
+    self.realImport = __builtin__.__import__
+    __builtin__.__import__ = self._import
+    self.globl = globals
+      
+  def _import(self, name, globals=None, locals=None, fromlist=[]):
+    '''produce variable in globals() when import command'''
+    result = apply(self.realImport, (name, globals, locals, fromlist))
+    if fromlist is not None:
+      if fromlist[0]!='*': # from ... import *
+        objlist = [getattr(result, x) for x in fromlist]
+      else: # from ... import cmd1,cmd2
+        objlist = [value for name, value in result.__dict__.items()]  
+      for obj in objlist:
+        if isinstance(obj, CommandClass): # any obj which is a command
+          self.addCommand(obj)
+    return result
+
+  def addCommand(self, cmd):
+    '''produce variable in globals() for all options in the command'''
+    for name, opt in cmd.options.items():
+      self.addOption(opt)  
+      
+  
+  def addOption(self, option):
+    '''produce variable in globals() for the option'''
+    from pyshin.option import OptionOccur
+    shortOpt = [opt[1:] for opt in option._short_opts]
+    longOpt = [opt[2:] for opt in option._long_opts]
+    for opt in shortOpt+longOpt:
+      self.globl[opt] = OptionOccur(opt, option)
+  
+  def uninstall(self):
+    '''restore the __builtin__.__import__'''
+    __builtin__.__import__ = self.realImport
+  
+  def __del__(self):
+    '''restore the __builtin__.__import__'''
+    __builtin__.__import__ = self.realImport

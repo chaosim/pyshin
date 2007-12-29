@@ -1,10 +1,18 @@
+todo 2007-12-28 13:47 produce help information
+  todo 2007-12-28 13:49 description of the comand
+  todo 2007-12-28 13:49 usage of the command
+  todo 2007-12-28 13:49 help on the option of the command
+
+new done 2007-12-26 14:06 end:2007-12-29 12:15 Produce varaible for option in the command
+new done 2007-12-29 12:16 end:2007-12-29 14:14 produce variable in globals() when import command
+
 done 2007-12-18 14:22 2007-12-20 14:24 class SomeCommand(Command) produces an instance of CommandClass
   # SomeCommand define the options and some custom methods of the command
   # 2007-12-22 21:45 refactor to make SomeCommand a true class.
   done 2007-12-24 21:17 end:2007-12-24 21:58 "open.readme.txt" should be permitted.
   done 2007-12-25 12:57 end:2007-12-25 13:33 open('readme.txt') should set value to open call
   done 2007-12-25 15:52 open %file1 %file2 should add arguments to open.
-  todo 2007-12-25 21:32 open %file -o/'optionvalue' %file
+  new done 2007-12-25 21:32 end:2007-12-28 12:53 open %file -o/'optionvalue' %file
   
 done end:2007-12-20 20:47 process CommandCall
   done 2007-12-23 14:38 end:2007-12-24 17:41 CommandCall should not pollute the instance of the command
@@ -22,7 +30,7 @@ done end:2007-12-20 20:47 process CommandCall
   done 2007-12-24 19:35 end:2007-12-24 21:11 if the option need no value, should disable __call__, __getattr__ and __eq__
   cancel 2007-12-25 15:20 cmd -o  (-o==arg) (-o==arg) should append options. 
     # precedence of == is not appropiate
-    # do not use ==/
+    # do not use == /
   done 2007-12-21 21:25 end:2007-12-24 17:40 refactor Option class for not repeating option name
    
   done 2007-12-20 21:23 end:2007-12-21 21:02 Meeting with options should store value in the commandcall
@@ -36,8 +44,8 @@ done end:2007-12-20 20:47 process CommandCall
       # 2007-12-25 15:43 should not either use __call__ or ==, use // instead.
         # 2007-12-25 21:34 use / instead of //
       done 2007-12-25 16:19 end:2007-12-25 17:05 Value can be given by // just like "cmd --option/value"
-        new done 2007-12-25 21:34 end:2007-12-26 12:15 use / instead of //
-      new 2007-12-25 21:30 end:2007-12-26 12:57 value can ge given only once.
+        done 2007-12-25 21:34 end:2007-12-26 12:15 use / instead of //
+      done 2007-12-25 21:30 end:2007-12-26 12:57 value can ge given only once.
     done 2007-12-21 13:39 end:2007-12-21 14:19 some option can be given values like "cmd --option.value.value.value"
   
   done 2007-12-23 14:11 The command call should have the state of itself.

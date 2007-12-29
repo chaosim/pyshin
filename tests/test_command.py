@@ -77,8 +77,10 @@ class CommandTestCase(unittest.TestCase):
     self.assertEqual(result.arguments, ['readme.txt', 'asdfdfas'])   
      
 def test_suite():
-  suite = unittest.TestSuite((unittest.makeSuite(CommandTestCase),
-         ))
+  suite = unittest.TestSuite((
+            unittest.makeSuite(CommandTestCase),
+            DocFileSuite('..\\command.txt', optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS),
+          ))
   return suite
 
 if __name__ == '__main__':

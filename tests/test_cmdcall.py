@@ -25,13 +25,8 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_pipeline_operator(self):
     '''Pipeline operators >> << should produce CommandCallChain'''
-    # a | b XXX
     cmda = CommandCall('a')
     cmdb = CommandCall('b')                
-##    result = cmda | cmdb
-##    self.assert_(isinstance(result, CommandCallChain))
-##    self.assert_((result[0] is cmda) and (result[1] is cmdb))
-##    self.assertRaises(exceptions.AttributeError, cmda.__or__, cmdb)
     # a >> b 
     result =cmda >> cmdb
     self.assert_(isinstance(result, CommandCallChain))
@@ -49,10 +44,6 @@ class CommandCallTestCase(unittest.TestCase):
     chain = cmda >> cmdb
     self.assert_(cmdb.input is cmda)#.output
 
-  def xxxtest__and__(self):
-    result = self.cmda and self.cmdb
-    self.assert_(isinstance(result, CommandCallChain))
-  
   def test_option(self):
     '''"cmd -o" should add the option o to cmd.options'''
     cmd = CommandCall(TestCommand)
@@ -133,49 +124,33 @@ class CommandCallTestCase(unittest.TestCase):
 ##    new>>> should not do this:
 ##    result = cmd -v('given_value_in__call__')
 ##    self.assertEqual(result.v, 'given_value_in__call__')  
+    #result = cmd %'file.txt' -o/'optionvalue' %file2.txt
 
     v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
     result = cmd -v/'given_value by /'
     self.assertEqual(result.v, 'given_value by /')  
 
-    #result = cmd %'file.txt' -o/'optionvalue' %file2.txt
 
     v = OptionOccur('v', TestCommand.options['v'])
     cmd = CommandCall(TestCommand)
     result = cmd -v.readme.txt
     self.assertEqual(result.v, 'readme.txt')  
 
-  def wait_test_state_of_executed(self):
+  def test_state_of_executed(self):
     '''the state of 'executed' should change after the call is executed.'''
     cmd = TestCommand()
     self.assertEqual(cmd.executed, False)
     cmd.execute()
     self.assertEqual(cmd.executed, True)
     
-  def test_attr_arg(self):
-    '''dotted name argument
-
-    xxx>>> class _Open(CommandCall):
-    ...   """should base on Command class which allow dotted path filename as arguments"""
-    ...   def __init__(self):
-    ...     super(_Open, self).__init__(None, None)
-    ...     self.path = ''
-    ...   def __getattr__(self, attr):
-    ...     try:
-    ...       return super(_Open, self).__getattr__(attr)
-    ...     except:
-    ...       if self.path=='':
-    ...         self.path += attr
-    ...       else:
-    ...         self.path += '.'+attr
-    ...       return self
+  def test_callArgAfterOption(self):
+    '''the arguments to the CommandCall occur after some option'''
+    cmd = TestCommand
+    o = ShortOptionOccur('o')
+    cc  =cmd -o % 'readme.txt'
+    self.assertEqual(cc.arguments, ['readme.txt'])
     
-    xxx>>> open = _Open()
-    xxx>>> open.readme.txt.path
-    'readme.txt'
-    '''
-
 class CommandCallChainTestCase(unittest.TestCase):
   def setUp(self):
     pass
@@ -266,9 +241,13 @@ class CommandCallChainTestCase(unittest.TestCase):
     class cmd3(command):
       def action(self):
         print self.command.__name__,
-    #cmd1 >> cmd2 >> cmd3
+    cmd1 >>cmd2 >> cmd3
     try: 
       cmd1 >> cmd1
+    except LoopInCommandCallChain:
+      pass
+    try: 
+      cmd1 >> cmd2 >> cmd3 >> cmd1
     except LoopInCommandCallChain:
       pass
       
