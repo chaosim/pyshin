@@ -1,4 +1,4 @@
 = Introduction =
 
-  Any checkout is welcome, but this project is in alpha phase, I hope to finish the main goal about in April 2008.
-  Some more project will be based on this project, such as commands in wxpython and stuffs on zope.
+{{{  Any checkout is welcome, but this project is in alpha phase, I hope to finish the main goal about in April 2008.
+  Some more project will be based on this project, such as commands in wxpython and stuffs on zope.}}}
