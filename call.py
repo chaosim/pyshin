@@ -5,6 +5,8 @@ from option import Option
 from error import RepeatOptionError, InvalidOption
 from command import CommandClass
 
+ExecutingCommand = False
+
 class CommandCallBase(object):
   ''' trig the execution by repr(and str? )
   '''  
@@ -18,11 +20,18 @@ class CommandCallBase(object):
     be dispatch to the command'''
     self.executed = True
    
+  def repr(self):
+    '''all given option and arguments have been given just now,
+    should execute the actual action of the command with them, 
+    maybe print or don't print the result.'''
+    return 'call on %s'%self.command.repr() #repr(self.execute()) #wait everythiny is ready
+
   def __repr__(self):
     '''all given option and arguments have been given just now,
     should execute the actual action of the command with them, 
     maybe print or don't print the result.'''
-    return 'call on %s'%self.command #repr(self.execute()) #wait everythiny is ready
+    self.execute()
+    return repr(self.result)
 
   def __str__(self):
     '''the CommandCall should be executed according to its command with given 
@@ -63,7 +72,10 @@ class CommandCall(CommandCallBase):
      >>> cmd --file=='readme.txt'
      '''
     
-    if other.name not in self.command.options:
+    if other.option is not None:
+      if not self.command.hasOption(other.option):
+        raise InvalidOption
+    elif other.name not in self.command.options:
       raise InvalidOption
     if other in self.options:
       raise RepeatOptionError
@@ -166,7 +178,11 @@ class CommandCall(CommandCallBase):
     chain.loop = [self, other]
     chain.loopDirection = '<<'
     return chain
-
+  def followOption(self, option):
+    print option, self.options
+    if option in self.options: 
+      return True
+    return False
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def __gt__(self, other):
@@ -178,11 +194,14 @@ class CommandCall(CommandCallBase):
     return run(self)
 
   def execute(self):
+    global ExecutingCommand
+    ExecutingCommand = True
     if not self.executed:
       if self.input is not None:
         self.input.execute()
       self.action()
       self.executed = True
+    ExecutingCommand = False
            
 class CommandCallChain(CommandCallBase):
   '''Calls chain of commands.'''
@@ -238,9 +257,13 @@ class CommandCallChain(CommandCallBase):
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def execute(self):
+    global ExecutingCommand
+    ExecutingCommand = True
     for call in self.calls:
       call.execute()
-
+    ExecutingCommand = False
+    self.result = ''
+    
   def __gt__(self, other):
     '''cmd >run to execute self'''
     from pyshin.error import InvalidCommand
@@ -249,10 +272,16 @@ class CommandCallChain(CommandCallBase):
       raise InvalidCommand
     return run(self)
 
+  def repr(self):
+    '''all the CommandCall in the chain should be executed with their option and 
+    arguments and return the repr of the last result'''
+    return '%s'%[call.repr() for call in self.calls] #repr(self.execute())
+  
   def __repr__(self):
     '''all the CommandCall in the chain should be executed with their option and 
     arguments and return the repr of the last result'''
-    return '%s'%self.calls #repr(self.execute())
+    self.execute()    
+    return self.result
   
   def __str__(self):
     '''all the CommandCall in the chain should be executed with their option 

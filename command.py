@@ -5,7 +5,7 @@ from pyshin.option import Option
 
 class CommandClass(Element):
   '''Prototype (scarecrow) Commands Implementation
-  these codes is stolen form zope.interface.interface.py
+  these codes is from zope.interface.interface.py
 
   description of command
   option: name, default, help item, type:(boolean, choice, text, ...)
@@ -17,7 +17,6 @@ class CommandClass(Element):
   action: an callable object.
   '''
   def __init__(self, name, bases=(), attrs=None, __doc__=None, __module__=None):
-    from pyshin.option import Option#, OptionContainer
     if attrs is None: attrs = {}
     
     if __module__ is None:
@@ -60,10 +59,17 @@ class CommandClass(Element):
     for attr, value in self.attrs.items():
       if isinstance(value, Option):
         dest.options[attr]=value
+        value.name = attr
+        setattr(dest, attr, value)
       elif type(value)==FunctionType:
         dest.cmdcallMethods[attr] = value
       else: 
         dest.dataAttributes[attr] = value
+  
+  def hasOption(self, opt):
+    for _, option in self.options.items():
+      if opt==option: return True
+    return False
   
   def allBases(self):
     '''all of the base command except self, by the direction frm self to super base'''
@@ -83,6 +89,7 @@ class CommandClass(Element):
           try: return cmd.attrs[attr]
           except: pass
       raise AttributeError, attr
+  
   def __getattr__(self, attr):
     try: return self._getattr(attr)
     except: 
@@ -101,17 +108,15 @@ class CommandClass(Element):
     for attr, value in self.cmdcallMethods.items():
       setattr(cmdcall, attr, bind(value, cmdcall)) 
     for attr, value in self.dataAttributes.items():
-      setattr(cmdcall, attr, deepcopy(value))
-    #print 'asdfdafadf, cmdcall.__dict__', cmdcall.__dict__
+      setattr(cmdcall, attr, deepcopy(value))    
     try: 
       cmdcall.__dict__['call'](*arg, **kw)
     except:pass
     return cmdcall
   
   def __mod__(self, arg):
-    cmdcall = self()
-    cmdcall.arguments.append(arg)
-    return cmdcall
+    '''cmd%arg provide arguments for call on the command''' 
+    return self()%arg
   
   def __eq__(self, other):
     return self.__name__==other.__name__
@@ -141,12 +146,22 @@ class CommandClass(Element):
     from pyshin.call import run
     if other is not run:
       raise InvalidCommand
-    return run(self)
+    return run(self())
   
-  def __repr__(self):
+  def repr(self): 
+    '''__repr__ is used for executing, this replaces standard __repr__'''
     return self.__name__
   
+  def __repr__(self):
+    '''execute the command'''
+    return repr(self())
+  
 command = CommandClass('Command')
+
+class _sampleCommand(command):
+  option1 = Option('-h', '--help')
+  option2 = Option('-v', '--verbose')
+
 
 def rebind(method, obj):
   import new
@@ -156,24 +171,6 @@ def bind(func, obj):
   import new
   return new.instancemethod(func, obj, obj.__class__)
 
-class Registry:
-  def __init__(self, globl=None):
-    if globl is None:
-      self.globl = {}
-    else: self.globl = globl
-  
-  def addOption(self, option):
-    from pyshin.option import OptionOccur
-    shortOpt = [opt[1:] for opt in option._short_opts]
-    longOpt = [opt[2:] for opt in option._long_opts]
-    for opt in shortOpt+longOpt:
-      #print opt     
-      self.globl[opt] = OptionOccur(opt, option)
-  def addCommand(self, cmd):
-    for name, opt in cmd.options.items():
-      self.addOption(opt)  
-
-import sys
 import __builtin__
 
 class importer:
@@ -182,6 +179,7 @@ class importer:
     self.realImport = __builtin__.__import__
     __builtin__.__import__ = self._import
     self.globl = globals
+    self.options = {}
       
   def _import(self, name, globals=None, locals=None, fromlist=[]):
     '''produce variable in globals() when import command'''
@@ -200,15 +198,18 @@ class importer:
     '''produce variable in globals() for all options in the command'''
     for name, opt in cmd.options.items():
       self.addOption(opt)  
-      
-  
-  def addOption(self, option):
+
+  def addOption(self, cmd, option):
     '''produce variable in globals() for the option'''
-    from pyshin.option import OptionOccur
-    shortOpt = [opt[1:] for opt in option._short_opts]
-    longOpt = [opt[2:] for opt in option._long_opts]
-    for opt in shortOpt+longOpt:
-      self.globl[opt] = OptionOccur(opt, option)
+    from pyshin.option import ShortOptionOccur, LongOptionOccur
+    for opt in [opt[1:] for opt in option._short_opts]:
+      if opt not in self.options:
+        self.globl[opt] = ShortOptionOccur(option)
+      else: self.globl[opt].addCommandOption(cmd, option)
+    for opt in [opt[2:] for opt in option._long_opts]:
+      if opt not in self.options:
+        self.globl[opt] = LongOptionOccur(option)
+      else: self.globl[opt].addCommandOption(cmd, option)
   
   def uninstall(self):
     '''restore the __builtin__.__import__'''

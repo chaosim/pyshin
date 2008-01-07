@@ -1,10 +1,23 @@
-todo 2007-12-28 13:47 produce help information
-  todo 2007-12-28 13:49 description of the comand
-  todo 2007-12-28 13:49 usage of the command
-  todo 2007-12-28 13:49 help on the option of the command
+todo 2007-12-28 13:47 !produce help information!
+  doing 2007-12-28 13:49 !description of the comand!
+  todo 2007-12-28 13:49 !usage of the command!
+  todo 2007-12-28 13:49 !help on the option of the command!
 
-new done 2007-12-26 14:06 end:2007-12-29 12:15 Produce varaible for option in the command
-new done 2007-12-29 12:16 end:2007-12-29 14:14 produce variable in globals() when import command
+todo 2008-01-02 13:45 !command history!
+  todo 2008-01-02 14:22 !append command call!
+  todo 2008-01-02 14:23 !list all commands in history!
+  todo 2008-01-02 14:23 !recall last command!
+  
+todo 2007-12-20 12:14 !some buitin command!
+  todo 2007-12-20 12:14 !cwd display current directory.!
+  todo 2008-01-02 14:25 !cd to change the current working directory! 
+  todo 2008-01-02 14:25 !copy to copy file! 
+  todo 2008-01-02 14:25 !move to move file! 
+
+new done 2007-12-25 14:46 end:2008-01-02 21:30 repr to execute
+
+done 2007-12-26 14:06 end:2007-12-29 12:15 Produce varaible for option in the command
+  done 2007-12-29 12:16 end:2007-12-29 14:14 produce variable in globals() when import command
 
 done 2007-12-18 14:22 2007-12-20 14:24 class SomeCommand(Command) produces an instance of CommandClass
   # SomeCommand define the options and some custom methods of the command
@@ -12,7 +25,7 @@ done 2007-12-18 14:22 2007-12-20 14:24 class SomeCommand(Command) produces an in
   done 2007-12-24 21:17 end:2007-12-24 21:58 "open.readme.txt" should be permitted.
   done 2007-12-25 12:57 end:2007-12-25 13:33 open('readme.txt') should set value to open call
   done 2007-12-25 15:52 open %file1 %file2 should add arguments to open.
-  new done 2007-12-25 21:32 end:2007-12-28 12:53 open %file -o/'optionvalue' %file
+  done 2007-12-25 21:32 end:2007-12-28 12:53 open %file -o/'optionvalue' %file
   
 done end:2007-12-20 20:47 process CommandCall
   done 2007-12-23 14:38 end:2007-12-24 17:41 CommandCall should not pollute the instance of the command
@@ -27,7 +40,7 @@ done end:2007-12-20 20:47 process CommandCall
   cancel 2007-12-21 21:15 Meeting long option should raise error if no long options in Command  
   done 2007-12-23 12:28 long option should have two minus and short option should have only one.
   done 2007-12-23 12:42 end:2007-12-23 12:48 long option should have two minus before it
-  done 2007-12-24 19:35 end:2007-12-24 21:11 if the option need no value, should disable __call__, __getattr__ and __eq__
+  done 2007-12-24 19:35 end:2007-12-24 21:11 if the option need no value, should disable __call__, __getattr__ and ==
   cancel 2007-12-25 15:20 cmd -o  (-o==arg) (-o==arg) should append options. 
     # precedence of == is not appropiate
     # do not use == /
@@ -35,10 +48,10 @@ done end:2007-12-20 20:47 process CommandCall
    
   done 2007-12-20 21:23 end:2007-12-21 21:02 Meeting with options should store value in the commandcall
     done end:2007-12-21 12:23 store_true and store_false with or without destination given should take action.
-    done 2007-12-21 12:45 end:2007-12-21 12:50 store_const should store a const value given in the option of the command
-    done end:2007-12-21 13:24 action 'store' should store the value get from __call__, just like cmd --option(value) XXX
-      done 2007-12-25 12:59 end:2007-12-25 13:49 option should not take value frome __call__, only from __eq__ or __getattr__
-        # 2007-12-25 15:24 perhaps I have to open the option(value) syntax for the limitation of cmd -o -o==arg -o==arg -o
+    done 2007-12-21 12:45 end:12-21 12:50 store_const should store a const value given in the option of the command
+    done end:12-21 13:24 action 'store' should store the value get from __call__, just like cmd --option(value) XXX
+      done 2007-12-25 12:59 end:12-25 13:49 option should not take value frome __call__, only from == or __getattr__
+        # 2007-12-25 15:24 perhaps I have to open the option(value) syntax for the limitation of cmd -o==arg -o==arg -o
           # use / instead, don't use (), ==                 
     done 2007-12-21 13:26 end:2007-12-21 13:36 Value can be given by == XXX, just like "cmd --option==value"
       # 2007-12-25 15:43 should not either use __call__ or ==, use // instead.
@@ -62,9 +75,5 @@ done 2007-12-21 22:01 end:2007-12-24 17:40 process CommandCallChain
   done 2007-12-25 14:48 end:2007-12-25 15:06 run(cmd), run(call) or run(chain) execute themself.
   done 2007-12-25 15:05 end:2007-12-25 20:53 Finding loop in call chain should raise error. 
 
-todo 2007-12-25 14:46 repr(cmd), repr(cmdcall), repr(callchain) execute the command
-
-todo 2007-12-20 12:14 !cwd display current directory.!
-
-todo 2007-12-19 15:20 !***** how to add names to globals() and locals() in fly?!
+todo 2007-12-19 15:20 end:2007-12-29 17:33 !how to add names to globals() and locals() in fly?!
   # /path/to/here is a path '/path/to/here'

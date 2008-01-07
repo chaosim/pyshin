@@ -3,10 +3,14 @@
   >>> from pyshin.tests.commands import TestCommand
   >>> from pyshin.tests.commands import command1
   >>> cmd = TestCommand
-  >>> cmd -c
-  call on TestCommand
-  >>> cmd -a
-  call on TestCommand
+  >>> cmdcall = cmd -c
+  >>> cmdcall = cmd -a
+
+  ##>>> from pyshin.tests.commands import HelpCommand as cmd1
+  ##>>> cmd1 -h
+  base command with help support
+
+
 
   xxx>>> from pyshin.tests.commands import cmd1, h, v, w
   
@@ -22,3 +26,6 @@
   run with default more verbose with tab = 4
   
   xxx>>> copy --from==file1.txt --to==file2.txt
+
+  At last we should restore the __buitin__.__import__.
+  >>> del importer

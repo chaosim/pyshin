@@ -1,56 +1,6 @@
 from error import OptionError
 from base import Attribute
 
-class xxxOptionContainer:
-  '''the container of the options provided in the CommandCall'''
-  def __init__(self):
-    self.options = []
-    
-  def addOption(self, option):
-    self.options.append(option)
-  
-  def __contains__(self, other):
-    return other in self.options
-  
-  def __getitem__(self, index):
-    return self.options[index]
-
-class xxxOptionGroup:
-  '''a Group of Option '''
-  def __sub__(self, other):
-    return OptionGroup(self, other)
-
-class xxxOption: #use the one from optparse.py for the moment.
-  '''option of command'''
-  def __init__(self, name):
-    self.name = name
-
-  def __sub__(self, other):
-    return OptionGroup(self, other)
-
-  def __getattr__(self,attr):
-    '''arguments can be given by attributes
-    >>> file = Option()
-    >>> file.readme.txt
-    '''
-  def __hash__(self):
-    return id(self)
-  
-  def __eq__(self, other):
-    return other.__class__==self.Option and self.name==other.name
-
-  def __call__(self, arg):
-    '''given argument to this option'''
-    if self.arg is None: self.arg = arg
-    else:
-      raise SyntaxError, "option is given more than one argument."%self.name
-
-  def __repr__(self):
-    return 'option %s'%self.name
-  
-  def __str__(self):
-    return 'option %s'%self.name
-  
 # =========================================================================
 # from python24\lib\optparse.py
 
@@ -320,10 +270,12 @@ from pyshin.error import OptionShouldnotHaveValue
 class OptionOccur(object):
   '''Occurence of Option in the CommandCall
   出现在命令调用中的选项'''
-  def __init__(self, name, option=None):
-    self.name = name
-    self.option = option
+  def __init__(self, command=None, option=None):
+    self.cmdOpts = [(command, option)]
     
+  def addCommandOption(command, option):
+    self.commandOptions.append((command, option))
+  
   def __call__(self, value):
     '''should not give value to option like -o(arg), (*arg, **kw) only 
     reserved for command
@@ -339,9 +291,20 @@ class OptionOccur(object):
     '''for long option --opt'''
   
   def __eq__(self, other):
-    '''should not use ==, use // instead '''
-    from pyshin.error import PyshinSyntaxError
-    raise PyshinSyntaxError
+    '''should not use == to set value for option, use / instead '''
+    from call import ExecutingCommand
+    if ExecutingCommand:      
+      #print self._short_opts, self._long_opts
+      print self, other
+      if type(other)==type('-o'):
+        if other in self.option._short_opts or other in self.option._long_opts:
+          return True
+      else: 
+        print other
+        return self._short_opts==other._short_opts and self._long_opts==other._long_opts
+    else:
+      from pyshin.error import PyshinSyntaxError
+      raise PyshinSyntaxError
   
   def __mod__(self, other):
     '''%arg provide argument for the CommandCall through the option'''
@@ -363,18 +326,22 @@ class OptionOccur(object):
     return self
   
   def __getattr__(self, attr):
-    if attr=='value': 
-      return self.__dict__[attr]
-    try:
-      return self.__dict__[attr]
-    except:
-      if not self.option.needValue():        
-        raise OptionShouldnotHaveValue
-      try: 
-        self.__dict__['value'] +='.'+attr
+    from call import ExecutingCommand
+    if ExecutingCommand:
+        return self.__dict__[attr]
+    else:
+      if attr=='value': 
+          return self.__dict__[attr]
+      try:
+        return self.__dict__[attr]
       except:
-        self.__dict__['value'] = attr
-      return self
+        if not self.option.needValue():        
+          raise OptionShouldnotHaveValue
+        try: 
+          self.__dict__['value'] +='.'+attr
+        except:
+          self.__dict__['value'] = attr
+        return self
   
   def __repr__(self):
     return '-%s'%self.name   
@@ -387,8 +354,8 @@ class ShortOptionOccur(OptionOccur):
     raise ShouldBeShortOption, self
     
 class LongOptionOccur(OptionOccur):
-  def __init__(self, name):
-    super(self.__class__, self).__init__(name)
+  def __init__(self, name, option=None):
+    super(self.__class__, self).__init__(name, option)
     self.havePrecededMinus = False
     
   def __neg__(self):

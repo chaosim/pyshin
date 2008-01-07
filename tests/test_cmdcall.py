@@ -150,7 +150,7 @@ class CommandCallTestCase(unittest.TestCase):
     o = ShortOptionOccur('o')
     cc  =cmd -o % 'readme.txt'
     self.assertEqual(cc.arguments, ['readme.txt'])
-    
+       
 class CommandCallChainTestCase(unittest.TestCase):
   def setUp(self):
     pass
@@ -172,8 +172,8 @@ class CommandCallChainTestCase(unittest.TestCase):
     >>> cmd3 = command3()
     >>> chain = cmd1<<cmd2<<cmd3
     
-    >>> print chain
-    [call on command1, call on command2, call on command3]
+    >>> print chain.repr()
+    ['call on command1', 'call on command2', 'call on command3']
     
     >>> chain.execute()
     command3 command2 command1
@@ -204,7 +204,19 @@ class CommandCallChainTestCase(unittest.TestCase):
     >>> run(chain)
     cmd1 cmd3 cmd2
     '''
-
+  def test_runCommand__repr__(self):
+    '''run(cmd), run(call) or run(chain) execute themself
+    >>> class cmd1(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    >>> class cmd2(command):
+    ...   def action(self):
+    ...     print self.command.__name__,
+    
+    >>> cmd1>>cmd2
+    cmd1 cmd2
+    '''
+    
   def test_runCommand(self):
     '''cmd >run, cmdcall >run or cmd1 >> cmd2 << cmd3 >run execute themself
     >>> class cmd1(command):

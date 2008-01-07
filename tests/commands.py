@@ -3,6 +3,16 @@
 from pyshin.command import command
 from pyshin.option import Option
 
+class HelpCommand(command):
+  helptext = 'base command with help support'
+  helpoption = Option('-h', '--help')
+  x = Option('-x')
+  def action(self):
+    if self.followOption(self.command.helpoption):
+      self.result = self.helptext
+    else:
+      self.result = 'execute with -x' 
+  
 class CommandWithoutOption(command):
   pass
 
