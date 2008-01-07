@@ -5,13 +5,8 @@ from option import Option
 from error import RepeatOptionError, InvalidOption
 from command import CommandClass
 
-<<<<<<< .mine
 InCommandConstruct = False
 
-=======
-ExecutingCommand = False
-
->>>>>>> .r16
 class CommandCallBase(object):
   ''' trig the execution by repr(and str? )
   '''  
@@ -77,17 +72,9 @@ class CommandCall(CommandCallBase):
      >>> cmd --help
      >>> cmd --file/'readme.txt'
      '''
-<<<<<<< .mine
     global InCommandConstruct
     InCommandConstruct = False
     if not other.belongtoCommand(self.command):
-=======
-    
-    if other.option is not None:
-      if not self.command.hasOption(other.option):
-        raise InvalidOption
-    elif other.name not in self.command.options:
->>>>>>> .r16
       raise InvalidOption
     if other in self.options: raise RepeatOptionError
     from pyshin.option import LongOptionOccur
@@ -274,24 +261,13 @@ class CommandCallChain(CommandCallBase):
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def execute(self):
-<<<<<<< .mine
     global InCommandConstruct
     InCommandConstruct = False
-=======
-    global ExecutingCommand
-    ExecutingCommand = True
->>>>>>> .r16
     for call in self.calls:
       call.execute()
-<<<<<<< .mine
     self.result = ''
     InCommandConstruct = True
     
-=======
-    ExecutingCommand = False
-    self.result = ''
-    
->>>>>>> .r16
   def __gt__(self, other):
     '''cmd >run to execute self'''
     global InCommandConstruct

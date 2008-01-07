@@ -272,18 +272,12 @@ from pyshin.error import OptionShouldnotHaveValue
 class OptionOccur(object):
   '''Occurence of Option in the CommandCall
   出现在命令调用中的选项'''
-<<<<<<< .mine
   def __init__(self, options=None):
     if options is not None: self.options = [options]
     else: selr.options = options
     if self.__class__==OptionOccur:
       raise TypeError, 'do not instantiate OptionOccur directly, using subclass of it instead.'
-=======
-  def __init__(self, command=None, option=None):
-    self.cmdOpts = [(command, option)]
->>>>>>> .r16
     
-<<<<<<< .mine
   def addOption(self, option):
     '''add an option which this occur aims at'''
     self.options.append(option)
@@ -294,11 +288,7 @@ class OptionOccur(object):
       if cmd==option.command: return True
     return False
   
-=======
-  def addCommandOption(command, option):
-    self.commandOptions.append((command, option))
   
->>>>>>> .r16
   def __call__(self, value):
     '''should not give value to option like -o(arg), (*arg, **kw) only 
     reserved for command
@@ -314,7 +304,6 @@ class OptionOccur(object):
     '''for long option --opt'''
   
   def __eq__(self, other):
-<<<<<<< .mine
     '''should not use == to set value for option, use / instead '''
     from call import InCommandConstruct
     if not InCommandConstruct:      
@@ -329,22 +318,6 @@ class OptionOccur(object):
     else:
       from pyshin.error import PyshinSyntaxError
       raise PyshinSyntaxError
-=======
-    '''should not use == to set value for option, use / instead '''
-    from call import ExecutingCommand
-    if ExecutingCommand:      
-      #print self._short_opts, self._long_opts
-      print self, other
-      if type(other)==type('-o'):
-        if other in self.option._short_opts or other in self.option._long_opts:
-          return True
-      else: 
-        print other
-        return self._short_opts==other._short_opts and self._long_opts==other._long_opts
-    else:
-      from pyshin.error import PyshinSyntaxError
-      raise PyshinSyntaxError
->>>>>>> .r16
   
   def __mod__(self, other):
     '''%arg provide argument for the CommandCall through the option'''
@@ -366,7 +339,6 @@ class OptionOccur(object):
     return self
   
   def __getattr__(self, attr):
-<<<<<<< .mine
     from call import InCommandConstruct
     print 34321443, InCommandConstruct, attr
     if not InCommandConstruct:
@@ -376,18 +348,7 @@ class OptionOccur(object):
         return self.__dict__[attr]
       try:
         return self.__dict__[attr]
-=======
-    from call import ExecutingCommand
-    if ExecutingCommand:
-        return self.__dict__[attr]
-    else:
-      if attr=='value': 
-          return self.__dict__[attr]
-      try:
-        return self.__dict__[attr]
->>>>>>> .r16
       except:
-<<<<<<< .mine
 ##        if not self.option.__dict__['needValue']():        
 ##          raise OptionShouldnotHaveValue
         try: 
@@ -395,15 +356,6 @@ class OptionOccur(object):
         except:
           self.__dict__['value'] = attr
         return self
-=======
-        if not self.option.needValue():        
-          raise OptionShouldnotHaveValue
-        try: 
-          self.__dict__['value'] +='.'+attr
-        except:
-          self.__dict__['value'] = attr
-        return self
->>>>>>> .r16
   
   def __repr__(self):
     return '%s'%self.options  
@@ -416,13 +368,8 @@ class ShortOptionOccur(OptionOccur):
     raise ShouldBeShortOption, self
     
 class LongOptionOccur(OptionOccur):
-<<<<<<< .mine
   def __init__(self, options=None):
     super(self.__class__, self).__init__(options)
-=======
-  def __init__(self, name, option=None):
-    super(self.__class__, self).__init__(name, option)
->>>>>>> .r16
     self.havePrecededMinus = False
     
   def __neg__(self):
