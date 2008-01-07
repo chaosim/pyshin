@@ -1,12 +1,17 @@
 '''process calls on the commands, produce pipelines, execute the command with 
 options and arguments provided'''
-
+ 
 from option import Option
 from error import RepeatOptionError, InvalidOption
 from command import CommandClass
 
+<<<<<<< .mine
+InCommandConstruct = False
+
+=======
 ExecutingCommand = False
 
+>>>>>>> .r16
 class CommandCallBase(object):
   ''' trig the execution by repr(and str? )
   '''  
@@ -54,13 +59,14 @@ class CommandCall(CommandCallBase):
     self.output = None
     self.input = None
     self.whoWaitValue = None # the dest of the current option which is absense of value
-    self.options = []
-    self.arguments = [] # arguments of the CommandCall
+    self.options = [] #the options saw from command line
+    self.arguments = [] # arguments of the CommandCall saw from command line
+
 
 # --------------------------------------------------------------------
 # provide option and arguments by operator:
 #  -o --option -o/arg -o/adsfdsf --option/asdfas 
-# (option=value) (argvalue)
+# (option=value) (argvalue)  XXX deprecated!
 # cmd.some.value open.readme.txt
 # cmd.option.afddsf
 # cmd.option==asdfsdakj
@@ -69,16 +75,21 @@ class CommandCall(CommandCallBase):
     legality of the option should be checked according to class the call based.
      >>> cmd -h
      >>> cmd --help
-     >>> cmd --file=='readme.txt'
+     >>> cmd --file/'readme.txt'
      '''
+<<<<<<< .mine
+    global InCommandConstruct
+    InCommandConstruct = False
+    if not other.belongtoCommand(self.command):
+=======
     
     if other.option is not None:
       if not self.command.hasOption(other.option):
         raise InvalidOption
     elif other.name not in self.command.options:
+>>>>>>> .r16
       raise InvalidOption
-    if other in self.options:
-      raise RepeatOptionError
+    if other in self.options: raise RepeatOptionError
     from pyshin.option import LongOptionOccur
     from pyshin.error import PyshinSyntaxError
     if isinstance(other, LongOptionOccur) and not other.havePrecededMinus:
@@ -89,7 +100,12 @@ class CommandCall(CommandCallBase):
     if 'argForCmdCall' in other.__dict__:
       self.arguments += other.__dict__['argForCmdCall']
     
-    cmdoption = self.command.options[other.name]
+    #cmdoption = self.command.options[other.name]
+    for opt in other.options:
+      if opt.command==self.command:
+        cmdoption = opt
+        break
+
     action = cmdoption.action
     if action=='store_true':
       setattr(self, cmdoption.dest, True)
@@ -126,6 +142,7 @@ class CommandCall(CommandCallBase):
 ##    else:
 ##        raise RuntimeError, "unknown action %r" % self.action
 
+    InCommandConstruct = True
     return self
 
   def __mod__(self, arg):
@@ -257,19 +274,33 @@ class CommandCallChain(CommandCallBase):
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command
   def execute(self):
+<<<<<<< .mine
+    global InCommandConstruct
+    InCommandConstruct = False
+=======
     global ExecutingCommand
     ExecutingCommand = True
+>>>>>>> .r16
     for call in self.calls:
       call.execute()
+<<<<<<< .mine
+    self.result = ''
+    InCommandConstruct = True
+    
+=======
     ExecutingCommand = False
     self.result = ''
     
+>>>>>>> .r16
   def __gt__(self, other):
     '''cmd >run to execute self'''
+    global InCommandConstruct
+    InCommandConstruct = False
     from pyshin.error import InvalidCommand
     from pyshin.call import run
     if other is not run:
       raise InvalidCommand
+    InCommandConstruct = True
     return run(self)
 
   def repr(self):

@@ -7,7 +7,7 @@ import exceptions
 
 from pyshin.command import command
 from pyshin.call import CommandCall, CommandCallChain
-from pyshin.option import Option, OptionOccur, ShortOptionOccur
+from pyshin.option import Option, ShortOptionOccur
 from pyshin.error import RepeatOptionError, InvalidOption
 
 from pyshin.tests.commands import TestCommand
@@ -25,8 +25,8 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_pipeline_operator(self):
     '''Pipeline operators >> << should produce CommandCallChain'''
-    cmda = CommandCall('a')
-    cmdb = CommandCall('b')                
+    cmda = CommandCall(TestCommand)
+    cmdb = CommandCall(TestCommand)                
     # a >> b 
     result =cmda >> cmdb
     self.assert_(isinstance(result, CommandCallChain))
@@ -39,22 +39,22 @@ class CommandCallTestCase(unittest.TestCase):
   def test_forward_pipeline(self):
     '''the previous call become the input of the next call
     前一个命令成为后一个命令的输入'''
-    cmda = CommandCall('a')
-    cmdb = CommandCall('b')                
+    cmda = CommandCall(TestCommand)
+    cmdb = CommandCall(TestCommand)                
     chain = cmda >> cmdb
     self.assert_(cmdb.input is cmda)#.output
 
   def test_option(self):
     '''"cmd -o" should add the option o to cmd.options'''
     cmd = CommandCall(TestCommand)
-    o = OptionOccur('o')
+    o = ShortOptionOccur(TestCommand.o)
     result = cmd -o
     self.assert_(o in cmd.options)
   
   def test_no_repeat_option(self):
     '''Meeting with options repeated should raise RepeatOptionError'''
     cmd = CommandCall(TestCommand)
-    o = OptionOccur('o')
+    o = ShortOptionOccur(TestCommand.o)
     try: 
       result = cmd -o -o
       self.fail('should raise syntax error')
@@ -64,13 +64,13 @@ class CommandCallTestCase(unittest.TestCase):
     '''The option followed after Commandcall must be an option of the Command'''
     from pyshin.tests.commands import CommandWithoutOption
     cmd = CommandCall(CommandWithoutOption)
-    o = OptionOccur('o')
+    o = ShortOptionOccur(TestCommand.o)
     try:
       result = cmd -o
       self.fail('should check invalid option')
     except InvalidOption: pass
     cmd = CommandCall(TestCommand)
-    u = OptionOccur('u')
+    u = ShortOptionOccur(TestCommand.u)
     try:
       result = cmd -u
       self.fail('should check invalid option')
@@ -81,13 +81,13 @@ class CommandCallTestCase(unittest.TestCase):
     from pyshin.error import PyshinSyntaxError
     from pyshin.error import ShouldBeShortOption
 
-    o = ShortOptionOccur('-o')
+    o = ShortOptionOccur(TestCommand.o)
     try:
       -o      
       self.fail('should check invalid option')
     except ShouldBeShortOption: pass
 
-    longopt = LongOptionOccur('longopt')
+    longopt = LongOptionOccur(TestCommand.longopt)
     try:
       --longopt      
       self.fail('should check too many minus')
@@ -95,7 +95,7 @@ class CommandCallTestCase(unittest.TestCase):
       pass
 
     cmd = CommandCall(TestCommand)
-    longopt = LongOptionOccur('longopt')
+    longopt = LongOptionOccur(TestCommand.longopt)
     try:
       cmd-longopt      
       self.fail('should check too few minus')
@@ -104,17 +104,17 @@ class CommandCallTestCase(unittest.TestCase):
     
   def test_addOptionToCommand(self):
     ''' Meeting with options should store value in the Commandcall'''
-    a = OptionOccur('a')
+    a = ShortOptionOccur(TestCommand.a)
     cmd = CommandCall(TestCommand)
     result = cmd -a
     self.assertEqual(result.a, True)  
     
-    b = OptionOccur('b')
+    b = ShortOptionOccur(TestCommand.b)
     cmd = CommandCall(TestCommand)
     result = cmd -b
     self.assertEqual(result.bb, False)  
     
-    c = OptionOccur('c')
+    c = ShortOptionOccur(TestCommand.c)
     cmd = CommandCall(TestCommand)
     result = cmd -c
     self.assertEqual(result.const_of_c, 'const_in_c_option_of_TestCommand')  
@@ -126,7 +126,7 @@ class CommandCallTestCase(unittest.TestCase):
 ##    self.assertEqual(result.v, 'given_value_in__call__')  
     #result = cmd %'file.txt' -o/'optionvalue' %file2.txt
 
-    v = OptionOccur('v', TestCommand.options['v'])
+    v = ShortOptionOccur(TestCommand.v)
     cmd = CommandCall(TestCommand)
     result = cmd -v/'given_value by /'
     self.assertEqual(result.v, 'given_value by /')  
@@ -147,7 +147,7 @@ class CommandCallTestCase(unittest.TestCase):
   def test_callArgAfterOption(self):
     '''the arguments to the CommandCall occur after some option'''
     cmd = TestCommand
-    o = ShortOptionOccur('o')
+    o = ShortOptionOccur(TestCommand.o)
     cc  =cmd -o % 'readme.txt'
     self.assertEqual(cc.arguments, ['readme.txt'])
        
@@ -270,7 +270,7 @@ class OptionTestCase(unittest.TestCase):
     '''if the option need no value, should disable __div__, __getattr__'''
     from pyshin.error import OptionShouldnotHaveValue
     opt = Option('-o', action='store_true')
-    o = OptionOccur('-o', opt)
+    o = ShortOptionOccur(opt)
     try:
       o.arg
       self.fail('should check ShouldnotHaveValue')
@@ -279,7 +279,7 @@ class OptionTestCase(unittest.TestCase):
     
     class cmd(command):
       o = Option('-o', action='store_true')
-    o = ShortOptionOccur('o', cmd.options['o'])
+    o = ShortOptionOccur(cmd.options['o'])
     try:
       o/'arg'
       self.fail('should not provide value for the option which need not value')
@@ -297,7 +297,7 @@ class OptionTestCase(unittest.TestCase):
     '''value can ge given only once'''
     from pyshin.error import OptionWithTooManySlash
     opt = Option('-o', action='store')
-    o = OptionOccur('-o', opt)
+    o = ShortOptionOccur(opt)
     try:
       o/'arg'/'arg'
       self.fail('should check providing value with / only once')

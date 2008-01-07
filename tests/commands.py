@@ -20,11 +20,13 @@ class TestCommandBase(command):
   o = Option('-o', action='store_true')
   a = Option('-a', action='store_true')
   b = Option('-b', action='store_false', dest='bb')  
+  longopt =  Option('--longopt')
   def action(self):pass
   
 class TestCommand(TestCommandBase):
   c = Option('-c', action='store_const', dest="const_of_c", const='const_in_c_option_of_TestCommand')  
   v = Option('-v', action='store')
+  u = Option('-u', action='store')
   longopt = Option('--longopt')
 
 class command1(command):

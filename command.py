@@ -1,4 +1,4 @@
-import sys
+import sys 
 from base import Element
 
 from pyshin.option import Option
@@ -59,18 +59,33 @@ class CommandClass(Element):
     for attr, value in self.attrs.items():
       if isinstance(value, Option):
         dest.options[attr]=value
+<<<<<<< .mine
+        value.name = attr
+        value.command = self
+        setattr(dest, attr, value)
+=======
         value.name = attr
         setattr(dest, attr, value)
+>>>>>>> .r16
       elif type(value)==FunctionType:
         dest.cmdcallMethods[attr] = value
       else: 
         dest.dataAttributes[attr] = value
   
+<<<<<<< .mine
+  def hasOptions(self, options):
+    '''the command has options'''
+    for _, option in self.options.items():
+      if option in options: return True
+    return False
+  
+=======
   def hasOption(self, opt):
     for _, option in self.options.items():
       if opt==option: return True
     return False
   
+>>>>>>> .r16
   def allBases(self):
     '''all of the base command except self, by the direction frm self to super base'''
     result = list(self.bases)
@@ -198,9 +213,25 @@ class importer:
     '''produce variable in globals() for all options in the command'''
     for name, opt in cmd.options.items():
       self.addOption(opt)  
+<<<<<<< .mine
+
+  def addOption(self, option):
+=======
 
   def addOption(self, cmd, option):
+>>>>>>> .r16
     '''produce variable in globals() for the option'''
+<<<<<<< .mine
+    from pyshin.option import ShortOptionOccur, LongOptionOccur
+    for opt in [opt[1:] for opt in option._short_opts]:
+      if opt not in self.options:
+        self.globl[opt] = ShortOptionOccur(option)
+      else: self.globl[opt].addOption(option)
+    for opt in [opt[2:] for opt in option._long_opts]:
+      if opt not in self.options:
+        self.globl[opt] = LongOptionOccur(option)
+      else: self.globl[opt].addOption(option)
+=======
     from pyshin.option import ShortOptionOccur, LongOptionOccur
     for opt in [opt[1:] for opt in option._short_opts]:
       if opt not in self.options:
@@ -210,6 +241,7 @@ class importer:
       if opt not in self.options:
         self.globl[opt] = LongOptionOccur(option)
       else: self.globl[opt].addCommandOption(cmd, option)
+>>>>>>> .r16
   
   def uninstall(self):
     '''restore the __builtin__.__import__'''
