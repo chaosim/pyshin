@@ -5,7 +5,7 @@ from option import Option
 from error import RepeatOptionError, InvalidOption
 from command import CommandClass
 
-InCommandConstruct = False
+InCommandConstruct = False # if in commandline, True, else if in method of call, False
 
 class CommandCallBase(object):
   ''' trig the execution by repr(and str? )
@@ -74,6 +74,7 @@ class CommandCall(CommandCallBase):
      '''
     global InCommandConstruct
     InCommandConstruct = False
+    #print 321442, self.command.repr(), other
     if not other.belongtoCommand(self.command):
       raise InvalidOption
     if other in self.options: raise RepeatOptionError
@@ -183,9 +184,10 @@ class CommandCall(CommandCallBase):
     chain.loopDirection = '<<'
     return chain
   def followOption(self, option):
-    print option, self.options
-    if option in self.options: 
-      return True
+    #print option, self.options
+    for oc in self.options:
+      if option.matchOptionOccur(oc): 
+        return True
     return False
 # ------------------------------------------------------------------------------
 # trig the execute of the call of the command

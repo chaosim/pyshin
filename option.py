@@ -266,15 +266,21 @@ class Option(Attribute):
   
   def needValue(self):
     return self.action in ['store', 'append', 'count']
-   
+  
+  def matchOptionOccur(self, optionOccur):
+    return self in optionOccur.options
+      
 from pyshin.error import OptionShouldnotHaveValue
 
 class OptionOccur(object):
   '''Occurence of Option in the CommandCall
   出现在命令调用中的选项'''
   def __init__(self, options=None):
-    if options is not None: self.options = [options]
-    else: selr.options = options
+    if options is None: self.options = []
+    elif isinstance(options, Option): 
+      self.options = [options]
+    else: 
+      self.options = options
     if self.__class__==OptionOccur:
       raise TypeError, 'do not instantiate OptionOccur directly, using subclass of it instead.'
     
@@ -329,18 +335,29 @@ class OptionOccur(object):
   def __div__(self, other):
     '''use / to provide value for the option '''
     from pyshin.error import OptionWithTooManySlash
-    if self.option.needValue():
-      #print 253452535, other, self.__dict__
-      if 'value' in self.__dict__: 
-        raise OptionWithTooManySlash
-      else:
-        self.value = other
-    else: raise OptionShouldnotHaveValue
+    from pyshin.error import OptionShouldnotHaveValue
+    for option in self.options:
+      #print 877887, option
+      if option.needValue():        
+        break
+    else: raise  OptionShouldnotHaveValue
+##    if self.option.needValue():
+##      #print 253452535, other, self.__dict__
+##      if 'value' in self.__dict__: 
+##        raise OptionWithTooManySlash
+##      else:
+##        self.value = other
+##    else: raise OptionShouldnotHaveValue  #wait to decide by the command
+    if 'value' in self.__dict__: 
+      raise OptionWithTooManySlash
+    else:
+      self.value = other
     return self
   
   def __getattr__(self, attr):
     from call import InCommandConstruct
-    print 34321443, InCommandConstruct, attr
+    from pyshin.error import OptionShouldnotHaveValue
+    #print 34321443, InCommandConstruct, attr
     if not InCommandConstruct:
       return self.__dict__[attr]
     else:
@@ -349,8 +366,11 @@ class OptionOccur(object):
       try:
         return self.__dict__[attr]
       except:
-##        if not self.option.__dict__['needValue']():        
-##          raise OptionShouldnotHaveValue
+        for option in self.options:
+          #print 877887, option
+          if option.needValue():        
+            break
+        else: raise  OptionShouldnotHaveValue
         try: 
           self.__dict__['value'] +='.'+attr
         except:

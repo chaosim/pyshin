@@ -62,7 +62,7 @@ class CommandCallTestCase(unittest.TestCase):
   
   def test_legal_option(self):
     '''The option followed after Commandcall must be an option of the Command'''
-    from pyshin.tests.commands import CommandWithoutOption
+    from pyshin.tests.commands import CommandWithoutOption, command1
     cmd = CommandCall(CommandWithoutOption)
     o = ShortOptionOccur(TestCommand.o)
     try:
@@ -70,7 +70,7 @@ class CommandCallTestCase(unittest.TestCase):
       self.fail('should check invalid option')
     except InvalidOption: pass
     cmd = CommandCall(TestCommand)
-    u = ShortOptionOccur(TestCommand.u)
+    u = ShortOptionOccur(command1.u)
     try:
       result = cmd -u
       self.fail('should check invalid option')
@@ -105,6 +105,8 @@ class CommandCallTestCase(unittest.TestCase):
   def test_addOptionToCommand(self):
     ''' Meeting with options should store value in the Commandcall'''
     a = ShortOptionOccur(TestCommand.a)
+##    print 'test_addOptionToCommand', 
+##    for o in a.options: print o.command.repr()
     cmd = CommandCall(TestCommand)
     result = cmd -a
     self.assertEqual(result.a, True)  
@@ -132,7 +134,7 @@ class CommandCallTestCase(unittest.TestCase):
     self.assertEqual(result.v, 'given_value by /')  
 
 
-    v = OptionOccur('v', TestCommand.options['v'])
+    v = ShortOptionOccur(TestCommand.v)
     cmd = CommandCall(TestCommand)
     result = cmd -v.readme.txt
     self.assertEqual(result.v, 'readme.txt')  

@@ -60,7 +60,7 @@ class CommandClass(Element):
       if isinstance(value, Option):
         dest.options[attr]=value
         value.name = attr
-        value.command = self
+        value.command = dest
         setattr(dest, attr, value)
       elif type(value)==FunctionType:
         dest.cmdcallMethods[attr] = value

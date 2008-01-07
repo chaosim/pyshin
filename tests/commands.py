@@ -32,6 +32,7 @@ class TestCommand(TestCommandBase):
 class command1(command):
   value = 1
   result = []
+  u = Option('-u', action='store')
   def action(self):
     print self.command.__name__,
 
