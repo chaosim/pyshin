@@ -3,5 +3,5 @@
 {{{
 Any checkout is welcome, but this project is in alpha phase, I hope to finish the main goal about in April 2008.
 Some more projects will be based on this project, such as commands in wxpython and stuffs on zope.
-Please tell me at Simeon.chaos@gmail.com if any questions.
+Please tell me(Simeon.chaos@gmail.com) if any questions.
 }}}
