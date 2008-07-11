@@ -1,4 +1,4 @@
-= Introduction =
+= Welcome and notify =
 
 {{{
 Any checkout is welcome, but this project is in alpha phase, I hope to finish the main goal about in April 2008.
