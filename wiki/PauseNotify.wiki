@@ -1,0 +1,7 @@
+#summary This project is paused for a long period.
+
+= Notify =
+
+This project have not been finished. But I have turn to another project, so I'm soryy to pause this project.
+
+The project which I'm doing is dao, hosted at http://code.google.com/p/daot. I'll make dao a new generation programming language. This language will be different from current high level language completely, just like high leve languages are different from assemble language.
